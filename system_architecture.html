@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Invisible Business Engine — Architecture</title>
+  <style>
+    :root {
+      --bg:      #080510;
+      --surface: #0e0a1a;
+      --card:    #140f22;
+      --border:  #1e1735;
+      --gold:    #e8b86d;
+      --gold2:   #f5d38a;
+      --dim:     #6a5a8a;
+      --muted:   #3a2e55;
+      --white:   #ede8f5;
+      --green:   #5de8a0;
+      --red:     #e86d7a;
+      --blue:    #6db4e8;
+      --purple:  #b46de8;
+      --cyan:    #6de8d8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--white); overflow-x: hidden; }
+
+    /* ── PROGRESS ── */
+    #prog { position:fixed; top:0; left:0; height:2px; background:linear-gradient(90deg,var(--purple),var(--cyan)); z-index:999; width:0; transition:width .2s; }
+
+    /* ── NAV DOTS ── */
+    .dots { position:fixed; right:22px; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:9px; z-index:200; }
+    .dot { width:7px; height:7px; border-radius:50%; background:var(--muted); cursor:pointer; transition:.3s; border:1px solid var(--border); }
+    .dot.active { background:var(--gold); transform:scale(1.5); border-color:var(--gold); }
+
+    /* ── SLIDE ── */
+    .slide { min-height:100vh; scroll-snap-align:start; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:64px 80px; position:relative; overflow:hidden; }
+    .inner { max-width:980px; width:100%; z-index:2; }
+
+    /* ── GLOW ── */
+    .glow { position:absolute; border-radius:50%; filter:blur(130px); opacity:.1; pointer-events:none; }
+
+    /* ── TYPE ── */
+    .eyebrow { font-size:.68rem; letter-spacing:4px; text-transform:uppercase; color:var(--dim); margin-bottom:14px; display:block; }
+    .big { font-size:clamp(2.4rem,5.5vw,5rem); font-weight:900; line-height:1.05; letter-spacing:-2px; }
+    .med { font-size:clamp(1.4rem,2.8vw,2.2rem); font-weight:800; line-height:1.2; }
+    .body { font-size:.95rem; color:var(--dim); line-height:1.8; }
+    .shine { border:none; height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); margin:28px 0; }
+
+    /* ── SCROLL HINT ── */
+    .scroll-hint { position:absolute; bottom:32px; left:50%; transform:translateX(-50%); font-size:.65rem; color:var(--muted); letter-spacing:3px; text-transform:uppercase; display:flex; flex-direction:column; align-items:center; gap:8px; animation:bob 2s infinite; }
+    .scroll-hint::after { content:''; width:1px; height:36px; background:linear-gradient(var(--purple),transparent); }
+    @keyframes bob { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(5px)} }
+
+    /* ══ SLIDE 1: HERO ══ */
+    #s1 { background:var(--bg); text-align:center; }
+    #s1 .big em { font-style:normal; background:linear-gradient(135deg,var(--purple),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .hero-sub { font-size:1.05rem; color:var(--dim); max-width:540px; margin:16px auto 36px; line-height:1.8; }
+    .layer-pills { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+    .lpill { padding:8px 18px; border-radius:30px; font-size:.78rem; font-weight:600; border:1px solid; }
+    .lp1 { border-color:var(--gold);   color:var(--gold);   background:rgba(232,184,109,.07); }
+    .lp2 { border-color:var(--green);  color:var(--green);  background:rgba(93,232,160,.06); }
+    .lp3 { border-color:var(--purple); color:var(--purple); background:rgba(180,109,232,.06); }
+    .lp4 { border-color:var(--cyan);   color:var(--cyan);   background:rgba(109,232,216,.06); }
+
+    /* ══ SLIDE 2: ARCHITECTURE DIAGRAM ══ */
+    #s2 { background:var(--surface); }
+    .arch-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:18px; margin-top:28px; }
+    .arch-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; position:relative; overflow:hidden; }
+    .arch-card::before { content:''; position:absolute; top:0; left:0; width:100%; height:3px; }
+    .ac-gold::before   { background:linear-gradient(90deg,#2e1a00,var(--gold)); }
+    .ac-green::before  { background:linear-gradient(90deg,#003a1a,var(--green)); }
+    .ac-purple::before { background:linear-gradient(90deg,#1a003a,var(--purple)); }
+    .ac-cyan::before   { background:linear-gradient(90deg,#003a35,var(--cyan)); }
+    .arch-num { font-size:3rem; font-weight:900; opacity:.07; position:absolute; top:12px; right:20px; line-height:1; }
+    .arch-icon { font-size:1.8rem; margin-bottom:12px; }
+    .arch-card h3 { font-size:1rem; font-weight:700; color:var(--white); margin-bottom:8px; }
+    .arch-card p  { font-size:.8rem; color:var(--dim); line-height:1.7; }
+    .arch-tag { display:inline-block; margin-top:12px; font-size:.7rem; font-weight:700; padding:3px 10px; border-radius:5px; }
+    .at-gold   { background:#3a2000; color:var(--gold); }
+    .at-green  { background:#003a1a; color:var(--green); }
+    .at-purple { background:#1a003a; color:var(--purple); }
+    .at-cyan   { background:#003a35; color:var(--cyan); }
+    .flow-arrow { text-align:center; font-size:1.4rem; color:var(--muted); padding:6px 0; align-self:center; }
+
+    /* ══ SLIDE 3: THE LOCAL BRAIN ══ */
+    #s3 { background:var(--bg); }
+    .brain-grid { display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:center; margin-top:24px; }
+    .brain-left .med { color:var(--gold2); margin-bottom:16px; }
+    .brain-left p { font-size:.9rem; color:var(--dim); line-height:1.8; margin-bottom:14px; }
+    .brain-bullets { list-style:none; display:flex; flex-direction:column; gap:10px; }
+    .brain-bullets li { display:flex; align-items:flex-start; gap:12px; font-size:.85rem; color:var(--white); }
+    .bb-dot { width:6px; height:6px; border-radius:50%; background:var(--gold); margin-top:6px; flex-shrink:0; }
+    .brain-right { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; }
+    .term-bar { background:#0a0815; border-radius:8px 8px 0 0; padding:10px 14px; display:flex; gap:6px; align-items:center; border-bottom:1px solid var(--border); }
+    .tb-dot { width:10px; height:10px; border-radius:50%; }
+    .term-body { background:#0a0815; border-radius:0 0 8px 8px; padding:18px 16px; font-family:'Courier New',monospace; font-size:.78rem; line-height:1.9; }
+    .tc { color:var(--cyan); }
+    .tg { color:var(--green); }
+    .tp { color:var(--purple); }
+    .td { color:var(--dim); }
+    .tgold { color:var(--gold); }
+
+    /* ══ SLIDE 4: MESSAGING LAYER ══ */
+    #s4 { background:var(--surface); }
+    .msg-grid { display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-top:28px; }
+    .msg-channel { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; }
+    .channel-icon { font-size:2.5rem; margin-bottom:14px; }
+    .msg-channel h3 { font-size:1.1rem; font-weight:700; color:var(--white); margin-bottom:10px; }
+    .msg-channel p  { font-size:.82rem; color:var(--dim); line-height:1.7; }
+    .chat-bubble-wrap { margin-top:16px; display:flex; flex-direction:column; gap:8px; }
+    .cb { padding:10px 14px; border-radius:12px; font-size:.78rem; max-width:80%; line-height:1.5; }
+    .cb-in  { background:#1a0e2e; color:var(--white); border-radius:12px 12px 12px 0; align-self:flex-start; }
+    .cb-out { background:#0e2e1a; color:var(--green); border-radius:12px 12px 0 12px; align-self:flex-end; }
+    .no-friction { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:20px; }
+    .nf-item { text-align:center; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px 10px; }
+    .nf-item .nf-icon { font-size:1.4rem; margin-bottom:6px; }
+    .nf-item span { display:block; font-size:.72rem; color:var(--dim); }
+    .nf-x { font-size:1.1rem; font-weight:700; color:var(--red); margin-bottom:4px; }
+
+    /* ══ SLIDE 5: CONTROL PANEL ══ */
+    #s5 { background:var(--bg); }
+    .control-grid { display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:start; margin-top:24px; }
+    .ctrl-left .med { color:var(--purple); margin-bottom:14px; }
+    .ctrl-warning { background:#1a0010; border:1px solid #4a0030; border-radius:10px; padding:16px 18px; margin-top:18px; font-size:.82rem; color:var(--red); line-height:1.6; }
+    .ctrl-warning strong { display:block; color:var(--red); margin-bottom:4px; font-size:.75rem; letter-spacing:2px; text-transform:uppercase; }
+    .ctrl-right { display:flex; flex-direction:column; gap:12px; }
+    .ctrl-item { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; display:flex; align-items:center; gap:14px; }
+    .ctrl-icon { font-size:1.3rem; width:36px; text-align:center; flex-shrink:0; }
+    .ctrl-item h4 { font-size:.88rem; font-weight:700; color:var(--white); }
+    .ctrl-item p  { font-size:.75rem; color:var(--dim); margin-top:2px; }
+
+    /* ══ SLIDE 6: AUTOMATION ENGINE ══ */
+    #s6 { background:var(--surface); }
+    .loop-wrap { display:flex; justify-content:center; margin-top:32px; }
+    .loop { display:flex; flex-direction:column; align-items:center; gap:0; max-width:460px; width:100%; }
+    .loop-node { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 28px; text-align:center; width:100%; }
+    .loop-node h4 { font-size:.95rem; font-weight:700; color:var(--white); }
+    .loop-node p  { font-size:.72rem; color:var(--dim); margin-top:3px; }
+    .loop-arrow { font-size:1.2rem; color:var(--cyan); padding:4px 0; }
+    .loop-node.active-node { border-color:var(--cyan); background:#0a1e1c; }
+    .loop-node.active-node h4 { color:var(--cyan); }
+    .loop-side { display:grid; grid-template-columns:1fr auto 1fr; gap:16px; align-items:center; width:100%; margin-top:24px; }
+    .loop-side-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px; text-align:center; font-size:.78rem; }
+    .loop-side-card strong { display:block; color:var(--gold); margin-bottom:4px; }
+    .loop-side-card span { color:var(--dim); font-size:.72rem; }
+    .loop-center-label { text-align:center; font-size:.7rem; color:var(--dim); letter-spacing:2px; text-transform:uppercase; }
+
+    /* ══ SLIDE 7: WEAK POINTS ══ */
+    #s7 { background:var(--bg); }
+    .weak-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:28px; }
+    .weak-card { background:var(--card); border:1px solid #3a0a12; border-radius:14px; padding:24px; }
+    .weak-card .wc-icon { font-size:1.6rem; margin-bottom:10px; }
+    .weak-card h4 { font-size:.9rem; font-weight:700; color:var(--red); margin-bottom:8px; }
+    .weak-card p  { font-size:.78rem; color:var(--dim); line-height:1.7; }
+    .fix-label { display:inline-block; margin-top:10px; font-size:.68rem; font-weight:700; padding:3px 9px; border-radius:5px; background:#003a10; color:var(--green); }
+    .read-twice { background:#1a0a00; border:1px solid #3a1a00; border-radius:12px; padding:20px 24px; margin-bottom:24px; font-size:.9rem; color:var(--gold); display:flex; align-items:center; gap:12px; }
+
+    /* ══ SLIDE 8: THE REAL PITCH ══ */
+    #s8 { background:radial-gradient(ellipse at center,#0e0a1a 0%,var(--bg) 70%); text-align:center; }
+    .pitch-box { background:linear-gradient(135deg,#0e0a1a,#140f22); border:1px solid var(--purple); border-radius:20px; padding:48px 52px; max-width:700px; margin:28px auto 0; position:relative; overflow:hidden; }
+    .pitch-box::before { content:''; position:absolute; top:0;left:0;right:0;bottom:0; background:radial-gradient(ellipse at top,rgba(180,109,232,.08),transparent 60%); pointer-events:none; }
+    .pitch-box .not-label { font-size:.68rem; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-bottom:20px; display:block; }
+    .not-list { display:flex; justify-content:center; gap:14px; flex-wrap:wrap; margin-bottom:28px; }
+    .not-pill { padding:7px 16px; border-radius:30px; font-size:.78rem; border:1px solid var(--border); color:var(--muted); text-decoration:line-through; }
+    .pitch-main { font-size:clamp(1.1rem,2vw,1.5rem); font-weight:700; color:var(--white); line-height:1.7; margin-bottom:20px; }
+    .pitch-main em { color:var(--purple); font-style:normal; }
+    .pitch-bottom { font-size:.9rem; color:var(--dim); line-height:1.9; }
+    .pitch-bottom strong { color:var(--cyan); }
+    .cta { display:inline-block; margin-top:32px; padding:13px 36px; background:linear-gradient(135deg,var(--purple),#7830c4); color:#fff; font-weight:700; font-size:.82rem; letter-spacing:1px; text-transform:uppercase; border-radius:8px; border:none; cursor:pointer; }
+
+  </style>
+</head>
+<body>
+
+<div id="prog"></div>
+<nav class="dots" id="navDots"></nav>
+
+<!-- ══════════════════════ S1: HERO -->
+<section class="slide" id="s1" data-label="Intro">
+  <div class="glow" style="width:600px;height:600px;background:var(--purple);top:-100px;left:-150px;"></div>
+  <div class="glow" style="width:400px;height:400px;background:var(--cyan);bottom:-80px;right:-80px;"></div>
+  <div class="inner" style="text-align:center;">
+    <span class="eyebrow">Westfield Coffee Co. &nbsp;·&nbsp; System Architecture &nbsp;·&nbsp; Internal</span>
+    <h1 class="big">The Invisible<br/><em>Business Engine</em></h1>
+    <p class="hero-sub">A private system that runs inside your business and handles your customers, your operations, and your numbers — in one place. No apps. No chaos. No middlemen.</p>
+    <div class="layer-pills">
+      <span class="lpill lp1">Local AI Brain</span>
+      <span class="lpill lp2">Messaging Layer</span>
+      <span class="lpill lp3">Control Panel</span>
+      <span class="lpill lp4">Automation Engine</span>
+    </div>
+  </div>
+  <div class="scroll-hint">Scroll</div>
+</section>
+
+<!-- ══════════════════════ S2: ARCHITECTURE OVERVIEW -->
+<section class="slide" id="s2" data-label="Overview">
+  <div class="glow" style="width:500px;height:500px;background:var(--cyan);top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+  <div class="inner">
+    <span class="eyebrow">System Architecture</span>
+    <h2 class="med" style="color:var(--white);">Four layers. One brain. <span style="color:var(--cyan);">Zero friction.</span></h2>
+    <div class="arch-grid">
+      <div class="arch-card ac-gold">
+        <div class="arch-num">01</div>
+        <div class="arch-icon">🧠</div>
+        <h3>Local AI Brain</h3>
+        <p>Runs inside the shop. No internet dependency for core logic. Learns patterns over time. Your private digital owner assistant.</p>
+        <span class="arch-tag at-gold">Private · Offline-capable</span>
+      </div>
+      <div class="arch-card ac-green">
+        <div class="arch-num">02</div>
+        <div class="arch-icon">💬</div>
+        <h3>Messaging Layer</h3>
+        <p>WhatsApp & Telegram bots. Customers order, ask questions, get updates. No app, no account, no learning curve.</p>
+        <span class="arch-tag at-green">WhatsApp · Telegram</span>
+      </div>
+      <div class="arch-card ac-purple">
+        <div class="arch-num">03</div>
+        <div class="arch-icon">🖥️</div>
+        <h3>Control Panel</h3>
+        <p>Your private terminal. Monitor everything, adjust logic, train responses, debug issues. Customers never see this. Clients never see this.</p>
+        <span class="arch-tag at-purple">Owner-only · Private</span>
+      </div>
+      <div class="arch-card ac-cyan">
+        <div class="arch-num">04</div>
+        <div class="arch-icon">⚙️</div>
+        <h3>Automation Engine</h3>
+        <p>The connective tissue. Messages → Orders → Inventory → Costs → Profit → Reports. One closed loop, no manual work.</p>
+        <span class="arch-tag at-cyan">The real value</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ S3: LOCAL BRAIN -->
+<section class="slide" id="s3" data-label="AI Brain">
+  <div class="glow" style="width:400px;height:400px;background:var(--gold);top:20%;right:-80px;"></div>
+  <div class="inner">
+    <span class="eyebrow">Layer 01 — The Local Brain</span>
+    <div class="brain-grid">
+      <div class="brain-left">
+        <h2 class="med" style="color:var(--gold2);">Your Private AI Core — Runs In The Shop</h2>
+        <p>No dependence on external APIs for core logic. Everything sensitive stays local. The system learns your business over time — your menu, your rush hours, your top customers, your margins.</p>
+        <p>This is the "digital owner assistant." It knows your business the way you do, available 24 hours a day.</p>
+        <ul class="brain-bullets">
+          <li><span class="bb-dot"></span>No internet required for core decisions</li>
+          <li><span class="bb-dot"></span>Learns customer and sales patterns over time</li>
+          <li><span class="bb-dot"></span>Stores everything locally — your data stays yours</li>
+          <li><span class="bb-dot"></span>Gets smarter the longer it runs</li>
+        </ul>
+      </div>
+      <div class="brain-right">
+        <div class="term-bar">
+          <div class="tb-dot" style="background:#e86d6d;"></div>
+          <div class="tb-dot" style="background:#e8c46d;"></div>
+          <div class="tb-dot" style="background:#6de88a;"></div>
+          <span style="font-size:.7rem;color:var(--dim);margin-left:8px;">nectar-brain · local</span>
+        </div>
+        <div class="term-body">
+          <span class="tc">$</span> <span class="tg">nectar status</span><br/>
+          <span class="td">→ Brain: </span><span class="tg">online ✓</span><br/>
+          <span class="td">→ Mode:  </span><span class="tgold">offline-capable</span><br/>
+          <span class="td">→ Model: </span><span class="tp">local-llama-3</span><br/>
+          <br/>
+          <span class="tc">$</span> <span class="tg">nectar learn --today</span><br/>
+          <span class="td">→ Orders today:    </span><span class="tg">387</span><br/>
+          <span class="td">→ Peak hour:       </span><span class="tg">9–10 AM</span><br/>
+          <span class="td">→ Top item:        </span><span class="tgold">Caramel Latte</span><br/>
+          <span class="td">→ Patterns saved:  </span><span class="tg">✓</span><br/>
+          <br/>
+          <span class="tc">$</span> <span class="tg">nectar forecast --tomorrow</span><br/>
+          <span class="td">→ Expected orders: </span><span class="tp">~400</span><br/>
+          <span class="td">→ Prep suggestion: </span><span class="tp">+10% milk</span><br/>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ S4: MESSAGING LAYER -->
+<section class="slide" id="s4" data-label="Messaging">
+  <div class="glow" style="width:400px;height:400px;background:var(--green);bottom:-80px;left:-80px;"></div>
+  <div class="inner">
+    <span class="eyebrow">Layer 02 — The Messaging Layer</span>
+    <h2 class="med" style="color:var(--green);margin-bottom:8px;">Where Customers Touch You</h2>
+    <p class="body" style="margin-bottom:20px;">No apps. No accounts. No friction. Customers already have WhatsApp and Telegram — that's all they need.</p>
+    <div class="msg-grid">
+      <div class="msg-channel" style="border-color:#003a1a;">
+        <div class="channel-icon">💚</div>
+        <h3>WhatsApp Bot</h3>
+        <p>Serves the customers who already use it every day. They text like they're messaging a friend. The bot handles it like a professional barista.</p>
+        <div class="chat-bubble-wrap">
+          <div class="cb cb-in">Hi, can I order a large caramel latte for pickup?</div>
+          <div class="cb cb-out">Got it! Large Caramel Latte — $6.50. Add a croissant for $3.75? Ready in 8 mins. Confirm? ✓</div>
+          <div class="cb cb-in">Yes please!</div>
+          <div class="cb cb-out">Order confirmed 🎉 Order #42 — ready at 9:14 AM.</div>
+        </div>
+      </div>
+      <div>
+        <div class="msg-channel" style="border-color:#001a3a; margin-bottom:16px;">
+          <div class="channel-icon">✈️</div>
+          <h3>Telegram Bot</h3>
+          <p>Same flow, different channel. Catches customers who prefer Telegram — no revenue left on the table from channel preference.</p>
+        </div>
+        <div class="no-friction">
+          <div class="nf-item">
+            <div class="nf-icon">📱</div>
+            <div class="nf-x">✗</div>
+            <span>No new app to download</span>
+          </div>
+          <div class="nf-item">
+            <div class="nf-icon">🔐</div>
+            <div class="nf-x">✗</div>
+            <span>No account to create</span>
+          </div>
+          <div class="nf-item">
+            <div class="nf-icon">📚</div>
+            <div class="nf-x">✗</div>
+            <span>No training needed</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ S5: CONTROL PANEL -->
+<section class="slide" id="s5" data-label="Control">
+  <div class="glow" style="width:400px;height:400px;background:var(--purple);top:20%;left:-80px;"></div>
+  <div class="inner">
+    <span class="eyebrow">Layer 03 — The Control Panel</span>
+    <div class="control-grid">
+      <div class="ctrl-left">
+        <h2 class="med" style="color:var(--purple);">Your World. Not Theirs.</h2>
+        <p class="body" style="margin-bottom:14px;">This is the owner's terminal. The place where you see everything, adjust everything, and stay in full control — without asking anyone for permission.</p>
+        <p class="body">Customers never see it. Clients never see it. If someone outside your operation is looking at this panel, something has already gone wrong.</p>
+        <div class="ctrl-warning">
+          <strong>⚠ Rule</strong>
+          He never sees this. If he does, you've already failed. This panel is the competitive moat — guard it.
+        </div>
+      </div>
+      <div class="ctrl-right">
+        <div class="ctrl-item">
+          <div class="ctrl-icon">👁️</div>
+          <div>
+            <h4>Monitor Everything</h4>
+            <p>Live order feed, customer messages, revenue, errors — all in one view</p>
+          </div>
+        </div>
+        <div class="ctrl-item">
+          <div class="ctrl-icon">🎛️</div>
+          <div>
+            <h4>Adjust Logic</h4>
+            <p>Change upsell rules, hours, pricing, response flows without touching code</p>
+          </div>
+        </div>
+        <div class="ctrl-item">
+          <div class="ctrl-icon">🧠</div>
+          <div>
+            <h4>Train Responses</h4>
+            <p>Improve bot replies, add new menu items, fine-tune tone and behavior</p>
+          </div>
+        </div>
+        <div class="ctrl-item">
+          <div class="ctrl-icon">🔧</div>
+          <div>
+            <h4>Debug Issues</h4>
+            <p>See what broke, when, and why — before the customer notices</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ S6: AUTOMATION ENGINE -->
+<section class="slide" id="s6" data-label="Engine">
+  <div class="glow" style="width:500px;height:500px;background:var(--cyan);top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+  <div class="inner" style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;">
+    <div>
+      <span class="eyebrow">Layer 04 — The Automation Engine</span>
+      <h2 class="med" style="color:var(--cyan);margin-bottom:16px;">Where Your Idea Becomes Money — or Dies</h2>
+      <p class="body" style="margin-bottom:18px;">This is the connective tissue of the system. It links every layer into a single closed loop. No manual work. No spreadsheets. No guessing.</p>
+      <p class="body" style="margin-bottom:18px;">Most businesses are duct-taped together with Square, Excel, random apps, and missed messages. <strong style="color:var(--white);">You're replacing that mess with a single brain.</strong></p>
+      <div style="background:var(--card);border:1px solid #003a35;border-radius:12px;padding:18px 20px;font-size:.82rem;color:var(--dim);line-height:1.7;">
+        <strong style="color:var(--cyan);display:block;margin-bottom:6px;">That's rare. Most competitors can't do this.</strong>
+        Not the chatbot. Not the AI model. The loop — everything connected, automated, local.
+      </div>
+    </div>
+    <div class="loop-wrap" style="display:block;">
+      <div class="loop">
+        <div class="loop-node active-node"><h4>Customer Messages</h4><p>WhatsApp / Telegram</p></div>
+        <div class="loop-arrow">↓</div>
+        <div class="loop-node"><h4>Orders</h4><p>Auto-confirmed, queued, timed</p></div>
+        <div class="loop-arrow">↓</div>
+        <div class="loop-node"><h4>Inventory</h4><p>Stock decremented in real time</p></div>
+        <div class="loop-arrow">↓</div>
+        <div class="loop-node"><h4>Costs</h4><p>Per-item cost tracked automatically</p></div>
+        <div class="loop-arrow">↓</div>
+        <div class="loop-node"><h4>Profit</h4><p>Margin calculated live</p></div>
+        <div class="loop-arrow">↓</div>
+        <div class="loop-node active-node" style="border-color:var(--gold);background:#1a0e00;"><h4 style="color:var(--gold);">Clean Financial Reports</h4><p>Ready for your accountant or tax software</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ S7: WEAK POINTS + TAXES -->
+<section class="slide" id="s7" data-label="Risks">
+  <div class="glow" style="width:400px;height:400px;background:var(--red);top:30%;right:-80px;opacity:.08;"></div>
+  <div class="inner">
+    <span class="eyebrow">Read This Twice — Where The Idea Is Weak</span>
+    <h2 class="med" style="color:var(--red);margin-bottom:24px;">Three Gaps That Kill the Pitch</h2>
+    <div class="weak-grid">
+      <div class="weak-card">
+        <div class="wc-icon">🔌</div>
+        <h4>No Reliability Story</h4>
+        <p>What happens when WiFi dies? When the bot crashes? When a wrong order is sent during rush hour? If you can't answer this, the pitch is dead on arrival.</p>
+        <span class="fix-label">Fix: Offline mode + fallback SMS</span>
+      </div>
+      <div class="weak-card">
+        <div class="wc-icon">🤯</div>
+        <h4>Too Technical</h4>
+        <p>Owners don't care about LLaMA or terminals. They care if it breaks at 9 AM on a Saturday. Lead with outcomes, not architecture.</p>
+        <span class="fix-label">Fix: Outcomes first, always</span>
+      </div>
+      <div class="weak-card">
+        <div class="wc-icon">🎪</div>
+        <h4>Too Many Promises</h4>
+        <p>"Predict everything. Run everything." Sounds fake. Sounds like every other pitch. One owner that believes you is worth ten that are impressed.</p>
+        <span class="fix-label">Fix: 3 outcomes max per pitch</span>
+      </div>
+    </div>
+    <hr class="shine"/>
+    <div style="background:#0e0a00;border:1px solid #3a2a00;border-radius:12px;padding:20px 24px;display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <div>
+        <p style="font-size:.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:10px;">❌ Never say this</p>
+        <p style="font-size:.88rem;color:var(--dim);line-height:1.7;font-style:italic;">"It does your taxes."</p>
+        <p style="font-size:.75rem;color:var(--muted);margin-top:6px;">Legal problems. Zero trust. Instant credibility loss.</p>
+      </div>
+      <div>
+        <p style="font-size:.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:10px;">✓ Say this instead</p>
+        <p style="font-size:.88rem;color:var(--white);line-height:1.7;font-style:italic;">"It automatically organizes your finances, tracks expenses, and prepares clean reports so your accountant or tax software becomes faster, cheaper, and more accurate."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ S8: THE REAL PITCH -->
+<section class="slide" id="s8" data-label="Pitch">
+  <div class="glow" style="width:600px;height:600px;background:var(--purple);top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+  <div class="inner" style="text-align:center;">
+    <span class="eyebrow">Fix Your Positioning — The Real Pitch</span>
+    <h2 class="big" style="font-size:clamp(1.8rem,4vw,3.2rem);color:var(--white);margin-bottom:8px;">
+      Stop selling features.<br/><span style="color:var(--purple);">Start selling outcomes.</span>
+    </h2>
+    <div class="pitch-box">
+      <span class="not-label">Nobody buys these</span>
+      <div class="not-list">
+        <span class="not-pill">AI assistant</span>
+        <span class="not-pill">15 tools</span>
+        <span class="not-pill">LLaMA model</span>
+        <span class="not-pill">omnipresence</span>
+        <span class="not-pill">smart automation</span>
+      </div>
+      <div class="pitch-main">
+        "This is not an app.<br/>
+        This is not a chatbot.<br/><br/>
+        This is a <em>private system</em> that runs inside your business<br/>
+        and handles your customers, your operations,<br/>
+        and your numbers — in one place."
+      </div>
+      <hr class="shine"/>
+      <div class="pitch-bottom">
+        You don't have to learn it.<br/>
+        You don't have to manage it.<br/><br/>
+        <strong>It just works in the background and keeps your business running smoother every day.</strong><br/><br/>
+        <span style="color:var(--gold);font-weight:700;font-size:1rem;">
+          "How much am I losing by not having this?"<br/>
+          <span style="font-size:.78rem;color:var(--dim);font-weight:400;">That's when you've got them.</span>
+        </span>
+      </div>
+    </div>
+    <button class="cta" onclick="window.scrollTo({top:0,behavior:'smooth'})">Back to Top</button>
+  </div>
+</section>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const navDots = document.getElementById('navDots');
+  const prog = document.getElementById('prog');
+  slides.forEach((s,i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i===0?' active':'');
+    d.title = s.dataset.label||'';
+    d.onclick = () => s.scrollIntoView({behavior:'smooth'});
+    navDots.appendChild(d);
+  });
+  const dots = document.querySelectorAll('.dot');
+  new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(e.isIntersecting) {
+        const i = [...slides].indexOf(e.target);
+        dots.forEach((d,j) => d.classList.toggle('active',i===j));
+        prog.style.width = (i/(slides.length-1)*100)+'%';
+      }
+    });
+  },{threshold:.5}).observe && slides.forEach(s => new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const i=[...slides].indexOf(e.target);
+        dots.forEach((d,j)=>d.classList.toggle('active',i===j));
+        prog.style.width=(i/(slides.length-1)*100)+'%';
+      }
+    });
+  },{threshold:.5}).observe(s));
+</script>
+</body>
+</html>
