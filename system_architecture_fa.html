@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>موتور نامرئی کسب‌وکار — معماری سیستم</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:      #080510;
+      --surface: #0e0a1a;
+      --card:    #140f22;
+      --border:  #1e1735;
+      --gold:    #e8b86d;
+      --gold2:   #f5d38a;
+      --dim:     #6a5a8a;
+      --muted:   #3a2e55;
+      --white:   #ede8f5;
+      --green:   #5de8a0;
+      --red:     #e86d7a;
+      --blue:    #6db4e8;
+      --purple:  #b46de8;
+      --cyan:    #6de8d8;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; scroll-snap-type:y mandatory; }
+    body {
+      font-family:'Vazirmatn', 'Segoe UI', sans-serif;
+      background:var(--bg);
+      color:var(--white);
+      overflow-x:hidden;
+      direction:rtl;
+    }
+
+    /* ── PROGRESS ── */
+    #prog { position:fixed; top:0; right:0; height:2px; background:linear-gradient(270deg,var(--purple),var(--cyan)); z-index:999; width:0; transition:width .2s; }
+
+    /* ── NAV DOTS ── */
+    .dots { position:fixed; left:22px; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:9px; z-index:200; }
+    .dot { width:7px; height:7px; border-radius:50%; background:var(--muted); cursor:pointer; transition:.3s; border:1px solid var(--border); }
+    .dot.active { background:var(--gold); transform:scale(1.5); border-color:var(--gold); }
+
+    /* ── SLIDE ── */
+    .slide { min-height:100vh; scroll-snap-align:start; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:64px 80px; position:relative; overflow:hidden; }
+    .inner { max-width:980px; width:100%; z-index:2; }
+
+    /* ── GLOW ── */
+    .glow { position:absolute; border-radius:50%; filter:blur(130px); opacity:.1; pointer-events:none; }
+
+    /* ── TYPE ── */
+    .eyebrow { font-size:.72rem; letter-spacing:2px; color:var(--dim); margin-bottom:14px; display:block; }
+    .big { font-size:clamp(2.4rem,5.5vw,5rem); font-weight:900; line-height:1.2; }
+    .med { font-size:clamp(1.4rem,2.8vw,2.2rem); font-weight:800; line-height:1.3; }
+    .body { font-size:.95rem; color:var(--dim); line-height:2; }
+    .shine { border:none; height:1px; background:linear-gradient(270deg,transparent,var(--border),transparent); margin:28px 0; }
+
+    /* ── SCROLL HINT ── */
+    .scroll-hint { position:absolute; bottom:32px; left:50%; transform:translateX(-50%); font-size:.65rem; color:var(--muted); letter-spacing:2px; display:flex; flex-direction:column; align-items:center; gap:8px; animation:bob 2s infinite; }
+    .scroll-hint::after { content:''; width:1px; height:36px; background:linear-gradient(var(--purple),transparent); }
+    @keyframes bob { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(5px)} }
+
+    /* ══ S1: HERO ══ */
+    #s1 { background:var(--bg); text-align:center; }
+    #s1 .big em { font-style:normal; background:linear-gradient(135deg,var(--purple),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .hero-sub { font-size:1.05rem; color:var(--dim); max-width:580px; margin:16px auto 36px; line-height:2; }
+    .layer-pills { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+    .lpill { padding:8px 18px; border-radius:30px; font-size:.82rem; font-weight:600; border:1px solid; }
+    .lp1 { border-color:var(--gold);   color:var(--gold);   background:rgba(232,184,109,.07); }
+    .lp2 { border-color:var(--green);  color:var(--green);  background:rgba(93,232,160,.06); }
+    .lp3 { border-color:var(--purple); color:var(--purple); background:rgba(180,109,232,.06); }
+    .lp4 { border-color:var(--cyan);   color:var(--cyan);   background:rgba(109,232,216,.06); }
+
+    /* ══ S2: OVERVIEW ══ */
+    #s2 { background:var(--surface); }
+    .arch-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:18px; margin-top:28px; }
+    .arch-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; position:relative; overflow:hidden; }
+    .arch-card::after { content:''; position:absolute; top:0; right:0; width:3px; height:100%; }
+    .ac-gold::after   { background:linear-gradient(180deg,#2e1a00,var(--gold)); }
+    .ac-green::after  { background:linear-gradient(180deg,#003a1a,var(--green)); }
+    .ac-purple::after { background:linear-gradient(180deg,#1a003a,var(--purple)); }
+    .ac-cyan::after   { background:linear-gradient(180deg,#003a35,var(--cyan)); }
+    .arch-num { font-size:3rem; font-weight:900; opacity:.07; position:absolute; top:12px; left:20px; line-height:1; }
+    .arch-icon { font-size:1.8rem; margin-bottom:12px; }
+    .arch-card h3 { font-size:1rem; font-weight:700; color:var(--white); margin-bottom:8px; }
+    .arch-card p  { font-size:.82rem; color:var(--dim); line-height:1.9; }
+    .arch-tag { display:inline-block; margin-top:12px; font-size:.72rem; font-weight:700; padding:3px 10px; border-radius:5px; }
+    .at-gold   { background:#3a2000; color:var(--gold); }
+    .at-green  { background:#003a1a; color:var(--green); }
+    .at-purple { background:#1a003a; color:var(--purple); }
+    .at-cyan   { background:#003a35; color:var(--cyan); }
+
+    /* ══ S3: BRAIN ══ */
+    #s3 { background:var(--bg); }
+    .brain-grid { display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:center; margin-top:24px; }
+    .brain-left .med { color:var(--gold2); margin-bottom:16px; }
+    .brain-left p { font-size:.9rem; color:var(--dim); line-height:2; margin-bottom:14px; }
+    .brain-bullets { list-style:none; display:flex; flex-direction:column; gap:10px; }
+    .brain-bullets li { display:flex; align-items:flex-start; gap:12px; font-size:.85rem; color:var(--white); }
+    .bb-dot { width:6px; height:6px; border-radius:50%; background:var(--gold); margin-top:7px; flex-shrink:0; }
+    .brain-right { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:0; overflow:hidden; }
+    .term-bar { background:#0a0815; padding:10px 14px; display:flex; gap:6px; align-items:center; border-bottom:1px solid var(--border); direction:ltr; }
+    .tb-dot { width:10px; height:10px; border-radius:50%; }
+    .term-body { background:#0a0815; padding:18px 16px; font-family:'Courier New',monospace; font-size:.76rem; line-height:2; direction:ltr; text-align:left; }
+    .tc{color:var(--cyan);} .tg{color:var(--green);} .tp{color:var(--purple);} .td{color:var(--dim);} .tgold{color:var(--gold);}
+
+    /* ══ S4: MESSAGING ══ */
+    #s4 { background:var(--surface); }
+    .msg-grid { display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-top:28px; }
+    .msg-channel { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; }
+    .channel-icon { font-size:2.5rem; margin-bottom:14px; }
+    .msg-channel h3 { font-size:1.05rem; font-weight:700; color:var(--white); margin-bottom:10px; }
+    .msg-channel p  { font-size:.82rem; color:var(--dim); line-height:1.9; }
+    .chat-bubble-wrap { margin-top:16px; display:flex; flex-direction:column; gap:8px; }
+    .cb { padding:10px 14px; border-radius:12px; font-size:.8rem; max-width:82%; line-height:1.6; }
+    .cb-in  { background:#1a0e2e; color:var(--white); border-radius:12px 12px 0 12px; align-self:flex-end; }
+    .cb-out { background:#0e2e1a; color:var(--green); border-radius:12px 12px 12px 0; align-self:flex-start; }
+    .no-friction { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:20px; }
+    .nf-item { text-align:center; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px 10px; }
+    .nf-item .nf-icon { font-size:1.4rem; margin-bottom:6px; }
+    .nf-item span { display:block; font-size:.72rem; color:var(--dim); }
+    .nf-x { font-size:1.1rem; font-weight:700; color:var(--red); margin-bottom:4px; }
+
+    /* ══ S5: CONTROL ══ */
+    #s5 { background:var(--bg); }
+    .control-grid { display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:start; margin-top:24px; }
+    .ctrl-left .med { color:var(--purple); margin-bottom:14px; }
+    .ctrl-warning { background:#1a0010; border:1px solid #4a0030; border-radius:10px; padding:16px 18px; margin-top:18px; font-size:.82rem; color:var(--red); line-height:1.8; }
+    .ctrl-warning strong { display:block; color:var(--red); margin-bottom:4px; font-size:.72rem; letter-spacing:1px; }
+    .ctrl-right { display:flex; flex-direction:column; gap:12px; }
+    .ctrl-item { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; display:flex; align-items:center; gap:14px; }
+    .ctrl-icon { font-size:1.3rem; width:36px; text-align:center; flex-shrink:0; }
+    .ctrl-item h4 { font-size:.88rem; font-weight:700; color:var(--white); }
+    .ctrl-item p  { font-size:.75rem; color:var(--dim); margin-top:2px; line-height:1.7; }
+
+    /* ══ S6: ENGINE ══ */
+    #s6 { background:var(--surface); }
+    .engine-grid { display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:center; }
+    .loop { display:flex; flex-direction:column; align-items:center; gap:0; }
+    .loop-node { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 28px; text-align:center; width:100%; }
+    .loop-node h4 { font-size:.92rem; font-weight:700; color:var(--white); }
+    .loop-node p  { font-size:.72rem; color:var(--dim); margin-top:3px; }
+    .loop-arrow { font-size:1.2rem; color:var(--cyan); padding:3px 0; }
+    .loop-node.active-node { border-color:var(--cyan); background:#0a1e1c; }
+    .loop-node.active-node h4 { color:var(--cyan); }
+
+    /* ══ S7: WEAK ══ */
+    #s7 { background:var(--bg); }
+    .weak-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:28px; }
+    .weak-card { background:var(--card); border:1px solid #3a0a12; border-radius:14px; padding:24px; }
+    .weak-card .wc-icon { font-size:1.6rem; margin-bottom:10px; }
+    .weak-card h4 { font-size:.9rem; font-weight:700; color:var(--red); margin-bottom:8px; }
+    .weak-card p  { font-size:.8rem; color:var(--dim); line-height:1.9; }
+    .fix-label { display:inline-block; margin-top:10px; font-size:.72rem; font-weight:700; padding:3px 9px; border-radius:5px; background:#003a10; color:var(--green); }
+    .tax-box { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:24px; background:#0e0a00; border:1px solid #3a2a00; border-radius:12px; padding:20px 24px; }
+    .tax-box p { font-size:.88rem; line-height:1.9; }
+
+    /* ══ S8: PITCH ══ */
+    #s8 { background:radial-gradient(ellipse at center,#0e0a1a 0%,var(--bg) 70%); text-align:center; }
+    .pitch-box { background:linear-gradient(135deg,#0e0a1a,#140f22); border:1px solid var(--purple); border-radius:20px; padding:48px 52px; max-width:720px; margin:28px auto 0; position:relative; overflow:hidden; }
+    .pitch-box::before { content:''; position:absolute; top:0;left:0;right:0;bottom:0; background:radial-gradient(ellipse at top,rgba(180,109,232,.08),transparent 60%); pointer-events:none; }
+    .not-list { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:28px; }
+    .not-pill { padding:7px 16px; border-radius:30px; font-size:.82rem; border:1px solid var(--border); color:var(--muted); text-decoration:line-through; }
+    .pitch-main { font-size:clamp(1rem,2vw,1.4rem); font-weight:700; color:var(--white); line-height:1.9; margin-bottom:20px; }
+    .pitch-main em { color:var(--purple); font-style:normal; }
+    .pitch-bottom { font-size:.9rem; color:var(--dim); line-height:2; }
+    .pitch-bottom strong { color:var(--cyan); }
+    .cta { display:inline-block; margin-top:32px; padding:13px 36px; background:linear-gradient(135deg,var(--purple),#7830c4); color:#fff; font-weight:700; font-size:.85rem; border-radius:8px; border:none; cursor:pointer; font-family:'Vazirmatn',sans-serif; }
+  </style>
+</head>
+<body>
+
+<div id="prog"></div>
+<nav class="dots" id="navDots"></nav>
+
+<!-- ══════════════ اسلاید ۱: معرفی -->
+<section class="slide" id="s1" data-label="معرفی">
+  <div class="glow" style="width:600px;height:600px;background:var(--purple);top:-100px;right:-150px;"></div>
+  <div class="glow" style="width:400px;height:400px;background:var(--cyan);bottom:-80px;left:-80px;"></div>
+  <div class="inner" style="text-align:center;">
+    <span class="eyebrow">کافه وستفیلد &nbsp;·&nbsp; معماری سیستم &nbsp;·&nbsp; محرمانه</span>
+    <h1 class="big">موتور نامرئی<br/><em>کسب‌وکار</em></h1>
+    <p class="hero-sub">یک سیستم خصوصی که داخل کسب‌وکار شما اجرا می‌شود و مشتریان، عملیات و اعداد شما را در یک جا مدیریت می‌کند. بدون اپلیکیشن. بدون هرج‌ومرج. بدون واسطه.</p>
+    <div class="layer-pills">
+      <span class="lpill lp1">مغز هوش مصنوعی محلی</span>
+      <span class="lpill lp2">لایه پیام‌رسانی</span>
+      <span class="lpill lp3">پنل کنترل</span>
+      <span class="lpill lp4">موتور اتوماسیون</span>
+    </div>
+  </div>
+  <div class="scroll-hint">اسکرول</div>
+</section>
+
+<!-- ══════════════ اسلاید ۲: نمای کلی معماری -->
+<section class="slide" id="s2" data-label="نمای کلی">
+  <div class="glow" style="width:500px;height:500px;background:var(--cyan);top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+  <div class="inner">
+    <span class="eyebrow">معماری سیستم</span>
+    <h2 class="med" style="color:var(--white);">چهار لایه. یک مغز. <span style="color:var(--cyan);">صفر اصطکاک.</span></h2>
+    <div class="arch-grid">
+      <div class="arch-card ac-gold">
+        <div class="arch-num">۰۱</div>
+        <div class="arch-icon">🧠</div>
+        <h3>مغز هوش مصنوعی محلی</h3>
+        <p>داخل فروشگاه اجرا می‌شود. برای منطق اصلی به اینترنت وابسته نیست. الگوها را در طول زمان یاد می‌گیرد. دستیار مالک دیجیتال شماست.</p>
+        <span class="arch-tag at-gold">خصوصی · قابل اجرا بدون اینترنت</span>
+      </div>
+      <div class="arch-card ac-green">
+        <div class="arch-num">۰۲</div>
+        <div class="arch-icon">💬</div>
+        <h3>لایه پیام‌رسانی</h3>
+        <p>ربات واتساپ و تلگرام. مشتریان سفارش می‌دهند، سوال می‌پرسند، و آپدیت دریافت می‌کنند. بدون اپ، بدون حساب کاربری، بدون یادگیری.</p>
+        <span class="arch-tag at-green">واتساپ · تلگرام</span>
+      </div>
+      <div class="arch-card ac-purple">
+        <div class="arch-num">۰۳</div>
+        <div class="arch-icon">🖥️</div>
+        <h3>پنل کنترل</h3>
+        <p>ترمینال خصوصی شماست. همه چیز را نظارت کنید، منطق را تنظیم کنید، پاسخ‌ها را آموزش دهید، مشکلات را رفع کنید. مشتریان هرگز این را نمی‌بینند.</p>
+        <span class="arch-tag at-purple">فقط برای مالک · خصوصی</span>
+      </div>
+      <div class="arch-card ac-cyan">
+        <div class="arch-num">۰۴</div>
+        <div class="arch-icon">⚙️</div>
+        <h3>موتور اتوماسیون</h3>
+        <p>بافت اتصال‌دهنده. پیام‌ها ← سفارش‌ها ← موجودی ← هزینه‌ها ← سود ← گزارش‌ها. یک حلقه بسته، بدون کار دستی.</p>
+        <span class="arch-tag at-cyan">ارزش واقعی اینجاست</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ اسلاید ۳: مغز محلی -->
+<section class="slide" id="s3" data-label="مغز AI">
+  <div class="glow" style="width:400px;height:400px;background:var(--gold);top:20%;left:-80px;"></div>
+  <div class="inner">
+    <span class="eyebrow">لایه ۰۱ — مغز محلی</span>
+    <div class="brain-grid">
+      <div class="brain-left">
+        <h2 class="med" style="color:var(--gold2);">هسته هوش مصنوعی خصوصی شما — داخل فروشگاه اجرا می‌شود</h2>
+        <p>برای منطق اصلی به API خارجی وابسته نیست. همه چیز حساس به صورت محلی ذخیره می‌شود. سیستم کسب‌وکار شما را در طول زمان یاد می‌گیرد — منوی شما، ساعات شلوغی، مشتریان برتر و حاشیه سود شما.</p>
+        <p>این «دستیار مالک دیجیتال» است. مثل خود شما کسب‌وکارتان را می‌شناسد، ۲۴ ساعت شبانه‌روز در دسترس است.</p>
+        <ul class="brain-bullets">
+          <li><span class="bb-dot"></span>برای تصمیم‌گیری‌های اصلی به اینترنت نیاز ندارد</li>
+          <li><span class="bb-dot"></span>الگوهای مشتری و فروش را در طول زمان یاد می‌گیرد</li>
+          <li><span class="bb-dot"></span>همه چیز به صورت محلی ذخیره می‌شود — داده‌های شما متعلق به شماست</li>
+          <li><span class="bb-dot"></span>هر چه بیشتر اجرا شود، هوشمندتر می‌شود</li>
+        </ul>
+      </div>
+      <div class="brain-right">
+        <div class="term-bar">
+          <div class="tb-dot" style="background:#e86d6d;"></div>
+          <div class="tb-dot" style="background:#e8c46d;"></div>
+          <div class="tb-dot" style="background:#6de88a;"></div>
+          <span style="font-size:.7rem;color:var(--dim);margin-left:8px;">nectar-brain · local</span>
+        </div>
+        <div class="term-body">
+          <span class="tc">$</span> <span class="tg">nectar status</span><br/>
+          <span class="td">→ Brain:  </span><span class="tg">online ✓</span><br/>
+          <span class="td">→ Mode:   </span><span class="tgold">offline-capable</span><br/>
+          <span class="td">→ Model:  </span><span class="tp">local-llama-3</span><br/>
+          <br/>
+          <span class="tc">$</span> <span class="tg">nectar learn --today</span><br/>
+          <span class="td">→ سفارشات امروز:  </span><span class="tg">۳۸۷</span><br/>
+          <span class="td">→ اوج ساعت:       </span><span class="tg">۹–۱۰ صبح</span><br/>
+          <span class="td">→ آیتم برتر:      </span><span class="tgold">لاته کارامل</span><br/>
+          <span class="td">→ الگوها ذخیره شد: </span><span class="tg">✓</span><br/>
+          <br/>
+          <span class="tc">$</span> <span class="tg">nectar forecast --tomorrow</span><br/>
+          <span class="td">→ سفارش پیش‌بینی: </span><span class="tp">~۴۰۰</span><br/>
+          <span class="td">→ پیشنهاد:        </span><span class="tp">+۱۰٪ شیر بیشتر</span><br/>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ اسلاید ۴: لایه پیام‌رسانی -->
+<section class="slide" id="s4" data-label="پیام‌رسانی">
+  <div class="glow" style="width:400px;height:400px;background:var(--green);bottom:-80px;right:-80px;"></div>
+  <div class="inner">
+    <span class="eyebrow">لایه ۰۲ — لایه پیام‌رسانی</span>
+    <h2 class="med" style="color:var(--green);margin-bottom:8px;">جایی که مشتریان با شما تماس می‌گیرند</h2>
+    <p class="body" style="margin-bottom:20px;">بدون اپ. بدون حساب کاربری. بدون اصطکاک. مشتریان از قبل واتساپ و تلگرام دارند — همین کافی است.</p>
+    <div class="msg-grid">
+      <div class="msg-channel" style="border-color:#003a1a;">
+        <div class="channel-icon">💚</div>
+        <h3>ربات واتساپ</h3>
+        <p>به مشتریانی که هر روز از آن استفاده می‌کنند خدمت می‌دهد. مثل پیام دادن به یک دوست. ربات مثل یک باریستا حرفه‌ای جواب می‌دهد.</p>
+        <div class="chat-bubble-wrap">
+          <div class="cb cb-in">سلام، می‌خوام یه لاته کارامل بزرگ سفارش بدم</div>
+          <div class="cb cb-out">دریافت شد! لاته کارامل بزرگ — ۶.۵۰ دلار. یه کراسان هم اضافه کنم؟ آماده‌ست در ۸ دقیقه. تایید می‌کنید؟ ✓</div>
+          <div class="cb cb-in">بله لطفاً!</div>
+          <div class="cb cb-out">سفارش تایید شد 🎉 سفارش ۴۲ — آماده ساعت ۹:۱۴ صبح</div>
+        </div>
+      </div>
+      <div>
+        <div class="msg-channel" style="border-color:#001a3a; margin-bottom:16px;">
+          <div class="channel-icon">✈️</div>
+          <h3>ربات تلگرام</h3>
+          <p>همان جریان، کانال متفاوت. مشتریانی که تلگرام را ترجیح می‌دهند را می‌گیرد — هیچ درآمدی از دست نمی‌رود.</p>
+        </div>
+        <div class="no-friction">
+          <div class="nf-item">
+            <div class="nf-icon">📱</div>
+            <div class="nf-x">✗</div>
+            <span>اپ جدیدی لازم نیست</span>
+          </div>
+          <div class="nf-item">
+            <div class="nf-icon">🔐</div>
+            <div class="nf-x">✗</div>
+            <span>حساب کاربری لازم نیست</span>
+          </div>
+          <div class="nf-item">
+            <div class="nf-icon">📚</div>
+            <div class="nf-x">✗</div>
+            <span>آموزش لازم نیست</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ اسلاید ۵: پنل کنترل -->
+<section class="slide" id="s5" data-label="کنترل">
+  <div class="glow" style="width:400px;height:400px;background:var(--purple);top:20%;right:-80px;"></div>
+  <div class="inner">
+    <span class="eyebrow">لایه ۰۳ — پنل کنترل</span>
+    <div class="control-grid">
+      <div class="ctrl-left">
+        <h2 class="med" style="color:var(--purple);">دنیای شما. نه دنیای آن‌ها.</h2>
+        <p class="body" style="margin-bottom:14px;">این ترمینال مالک است. جایی که همه چیز را می‌بینید، همه چیز را تنظیم می‌کنید، و کنترل کامل را بدون اجازه گرفتن از کسی در دست دارید.</p>
+        <p class="body">مشتریان آن را نمی‌بینند. مشتریان تجاری آن را نمی‌بینند. اگر کسی خارج از عملیات شما این پنل را ببیند، چیزی جدی اشتباه شده است.</p>
+        <div class="ctrl-warning">
+          <strong>⚠ قانون مهم</strong>
+          او هرگز نباید این را ببیند. اگر دید، قبلاً شکست خورده‌اید. این پنل حفره دفاعی رقابتی شماست — از آن محافظت کنید.
+        </div>
+      </div>
+      <div class="ctrl-right">
+        <div class="ctrl-item">
+          <div class="ctrl-icon">👁️</div>
+          <div>
+            <h4>نظارت بر همه چیز</h4>
+            <p>فید زنده سفارشات، پیام‌های مشتریان، درآمد، خطاها — همه در یک نمای یکپارچه</p>
+          </div>
+        </div>
+        <div class="ctrl-item">
+          <div class="ctrl-icon">🎛️</div>
+          <div>
+            <h4>تنظیم منطق</h4>
+            <p>تغییر قوانین فروش افزوده، ساعات کاری، قیمت‌گذاری بدون دست زدن به کد</p>
+          </div>
+        </div>
+        <div class="ctrl-item">
+          <div class="ctrl-icon">🧠</div>
+          <div>
+            <h4>آموزش پاسخ‌ها</h4>
+            <p>بهبود پاسخ‌های ربات، اضافه کردن آیتم‌های منو، تنظیم لحن و رفتار</p>
+          </div>
+        </div>
+        <div class="ctrl-item">
+          <div class="ctrl-icon">🔧</div>
+          <div>
+            <h4>رفع اشکال</h4>
+            <p>ببینید چه چیزی، کِی و چرا خراب شد — قبل از اینکه مشتری متوجه شود</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ اسلاید ۶: موتور اتوماسیون -->
+<section class="slide" id="s6" data-label="موتور">
+  <div class="glow" style="width:500px;height:500px;background:var(--cyan);top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+  <div class="inner">
+    <div class="engine-grid">
+      <div>
+        <span class="eyebrow">لایه ۰۴ — موتور اتوماسیون</span>
+        <h2 class="med" style="color:var(--cyan);margin-bottom:16px;">جایی که ایده‌تان تبدیل به پول می‌شود — یا می‌میرد</h2>
+        <p class="body" style="margin-bottom:18px;">این بافت اتصال‌دهنده سیستم است. هر لایه را به یک حلقه بسته واحد متصل می‌کند. بدون کار دستی. بدون اکسل. بدون حدس و گمان.</p>
+        <p class="body" style="margin-bottom:18px;">اکثر کسب‌وکارها با Square، اکسل، اپ‌های تصادفی و پیام‌های از دست رفته کنار هم وصله‌پینه شده‌اند. <strong style="color:var(--white);">شما این هرج‌ومرج را با یک مغز واحد جایگزین می‌کنید.</strong></p>
+        <div style="background:var(--card);border:1px solid #003a35;border-radius:12px;padding:18px 20px;font-size:.82rem;color:var(--dim);line-height:1.9;">
+          <strong style="color:var(--cyan);display:block;margin-bottom:6px;">این نادر است. اکثر رقبا نمی‌توانند این کار را بکنند.</strong>
+          نه ربات چت. نه مدل هوش مصنوعی. حلقه — همه چیز متصل، خودکار، محلی.
+        </div>
+      </div>
+      <div class="loop">
+        <div class="loop-node active-node"><h4>پیام‌های مشتری</h4><p>واتساپ / تلگرام</p></div>
+        <div class="loop-arrow">↓</div>
+        <div class="loop-node"><h4>سفارشات</h4><p>تایید خودکار، صف‌بندی، زمان‌بندی</p></div>
+        <div class="loop-arrow">↓</div>
+        <div class="loop-node"><h4>موجودی</h4><p>کاهش موجودی در لحظه</p></div>
+        <div class="loop-arrow">↓</div>
+        <div class="loop-node"><h4>هزینه‌ها</h4><p>هزینه هر آیتم به صورت خودکار ردیابی می‌شود</p></div>
+        <div class="loop-arrow">↓</div>
+        <div class="loop-node"><h4>سود</h4><p>حاشیه سود به صورت زنده محاسبه می‌شود</p></div>
+        <div class="loop-arrow">↓</div>
+        <div class="loop-node active-node" style="border-color:var(--gold);background:#1a0e00;"><h4 style="color:var(--gold);">گزارش‌های مالی تمیز</h4><p>آماده برای حسابدار یا نرم‌افزار مالیاتی</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ اسلاید ۷: نقاط ضعف + مالیات -->
+<section class="slide" id="s7" data-label="ریسک‌ها">
+  <div class="glow" style="width:400px;height:400px;background:var(--red);top:30%;left:-80px;opacity:.08;"></div>
+  <div class="inner">
+    <span class="eyebrow">این را دو بار بخوانید — نقاط ضعف ایده</span>
+    <h2 class="med" style="color:var(--red);margin-bottom:24px;">سه شکافی که پیچ را از بین می‌برند</h2>
+    <div class="weak-grid">
+      <div class="weak-card">
+        <div class="wc-icon">🔌</div>
+        <h4>نبود داستان قابلیت اطمینان</h4>
+        <p>وقتی اینترنت قطع می‌شود چه اتفاقی می‌افتد؟ وقتی ربات کرش می‌کند؟ وقتی سفارش اشتباه در ساعت شلوغی ارسال می‌شود؟ اگر نتوانید جواب دهید، پیچ شما تمام شده است.</p>
+        <span class="fix-label">راه‌حل: حالت آفلاین + پشتیبان</span>
+      </div>
+      <div class="weak-card">
+        <div class="wc-icon">🤯</div>
+        <h4>خیلی فنی</h4>
+        <p>مالکان به مدل‌های هوش مصنوعی اهمیت نمی‌دهند. آن‌ها نگران این هستند که ساعت ۹ صبح شنبه از کار بیفتد. اول نتایج، همیشه.</p>
+        <span class="fix-label">راه‌حل: اول نتایج، همیشه</span>
+      </div>
+      <div class="weak-card">
+        <div class="wc-icon">🎪</div>
+        <h4>وعده‌های زیادی</h4>
+        <p>«همه چیز را پیش‌بینی می‌کند. همه چیز را مدیریت می‌کند.» دروغ به نظر می‌رسد. یک مالک که باور کند بهتر از ده نفری است که تحت تأثیر قرار گرفتند.</p>
+        <span class="fix-label">راه‌حل: حداکثر ۳ نتیجه در هر پیچ</span>
+      </div>
+    </div>
+    <hr class="shine"/>
+    <div class="tax-box">
+      <div>
+        <p style="font-size:.72rem;letter-spacing:1px;color:var(--red);margin-bottom:10px;">❌ هرگز این را نگویید</p>
+        <p style="color:var(--dim);font-style:italic;">"مالیات شما را انجام می‌دهد."</p>
+        <p style="font-size:.75rem;color:var(--muted);margin-top:6px;">مشکل قانونی. صفر اعتماد. از دست دادن فوری اعتبار.</p>
+      </div>
+      <div>
+        <p style="font-size:.72rem;letter-spacing:1px;color:var(--green);margin-bottom:10px;">✓ به جای آن این را بگویید</p>
+        <p style="color:var(--white);line-height:2;">"امور مالی شما را به صورت خودکار سازماندهی می‌کند، هزینه‌ها را ردیابی می‌کند، و گزارش‌های تمیز آماده می‌کند تا حسابدار یا نرم‌افزار مالیاتی شما سریع‌تر، ارزان‌تر و دقیق‌تر کار کند."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ اسلاید ۸: پیچ واقعی -->
+<section class="slide" id="s8" data-label="پیچ">
+  <div class="glow" style="width:600px;height:600px;background:var(--purple);top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+  <div class="inner" style="text-align:center;">
+    <span class="eyebrow">موضع‌گیری خود را درست کنید — پیچ واقعی</span>
+    <h2 class="big" style="font-size:clamp(1.8rem,4vw,3rem);color:var(--white);margin-bottom:8px;">
+      ویژگی نفروشید.<br/><span style="color:var(--purple);">نتیجه بفروشید.</span>
+    </h2>
+    <div class="pitch-box">
+      <div class="not-list">
+        <span class="not-pill">دستیار هوش مصنوعی</span>
+        <span class="not-pill">۱۵ ابزار</span>
+        <span class="not-pill">مدل LLaMA</span>
+        <span class="not-pill">حضور همه‌جا</span>
+        <span class="not-pill">اتوماسیون هوشمند</span>
+      </div>
+      <div class="pitch-main">
+        "این یک اپ نیست.<br/>
+        این یک ربات چت نیست.<br/><br/>
+        این یک <em>سیستم خصوصی</em> است که داخل کسب‌وکار شما اجرا می‌شود<br/>
+        و مشتریان، عملیات و اعداد شما را — در یک جا مدیریت می‌کند."
+      </div>
+      <hr class="shine"/>
+      <div class="pitch-bottom">
+        لازم نیست آن را یاد بگیرید.<br/>
+        لازم نیست آن را مدیریت کنید.<br/><br/>
+        <strong>فقط در پس‌زمینه کار می‌کند و هر روز کسب‌وکار شما را روان‌تر نگه می‌دارد.</strong><br/><br/>
+        <span style="color:var(--gold);font-weight:700;font-size:1rem;">
+          «با نداشتن این سیستم چقدر ضرر می‌کنم؟»<br/>
+          <span style="font-size:.78rem;color:var(--dim);font-weight:400;">وقتی این سوال را بپرسند، شما برنده شده‌اید.</span>
+        </span>
+      </div>
+    </div>
+    <button class="cta" onclick="window.scrollTo({top:0,behavior:'smooth'})">بازگشت به بالا</button>
+  </div>
+</section>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const navDots = document.getElementById('navDots');
+  const prog = document.getElementById('prog');
+  slides.forEach((s,i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i===0?' active':'');
+    d.title = s.dataset.label||'';
+    d.onclick = () => s.scrollIntoView({behavior:'smooth'});
+    navDots.appendChild(d);
+  });
+  const dots = document.querySelectorAll('.dot');
+  slides.forEach(s => new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        const i = [...slides].indexOf(e.target);
+        dots.forEach((d,j) => d.classList.toggle('active', i===j));
+        prog.style.width = (i/(slides.length-1)*100)+'%';
+      }
+    });
+  },{threshold:.5}).observe(s));
+</script>
+</body>
+</html>
