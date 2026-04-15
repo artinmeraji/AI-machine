@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Westfield Coffee Co. — Daily Sales Report</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a0a00;
+      color: #f5e6d0;
+      padding: 30px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    header h1 {
+      font-size: 2.2rem;
+      color: #e8b86d;
+      letter-spacing: 2px;
+    }
+    header p {
+      color: #c4956a;
+      font-size: 0.95rem;
+      margin-top: 4px;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+    .card {
+      background: #2c1a0e;
+      border: 1px solid #5c3a1e;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .card .label { font-size: 0.8rem; color: #c4956a; text-transform: uppercase; }
+    .card .amount { font-size: 1.8rem; font-weight: bold; color: #e8b86d; margin-top: 6px; }
+    .card .sub { font-size: 0.75rem; color: #8a6a50; margin-top: 4px; }
+    .card .up   { color: #6de8a0; font-size: 0.8rem; margin-top: 4px; }
+    .card .down { color: #e86d6d; font-size: 0.8rem; margin-top: 4px; }
+
+    .section-title {
+      color: #e8b86d;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 28px 0 12px;
+      border-left: 4px solid #5c3a1e;
+      padding-left: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #2c1a0e;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+    th {
+      background: #5c3a1e;
+      color: #e8b86d;
+      padding: 14px 16px;
+      text-align: left;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #3d2410;
+      font-size: 0.95rem;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #3d2410; }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .badge.hot       { background: #4a1a0a; color: #e88d6d; }
+    .badge.cold      { background: #0a1a3a; color: #6db8e8; }
+    .badge.food      { background: #1a3a0a; color: #a0e86d; }
+    .badge.seasonal  { background: #2c0a2c; color: #e86de8; }
+
+    .total-row td {
+      font-weight: bold;
+      color: #e8b86d;
+      background: #3d2410;
+      font-size: 1rem;
+    }
+
+    .bar-wrap {
+      background: #2c1a0e;
+      border: 1px solid #5c3a1e;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 28px;
+    }
+    .bar-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 14px;
+      gap: 12px;
+    }
+    .bar-row:last-child { margin-bottom: 0; }
+    .bar-label { width: 140px; font-size: 0.85rem; color: #c4956a; flex-shrink: 0; }
+    .bar-track { flex: 1; background: #3d2410; border-radius: 6px; height: 18px; }
+    .bar-fill  { height: 18px; border-radius: 6px; background: linear-gradient(90deg, #5c3a1e, #e8b86d); }
+    .bar-val   { width: 60px; text-align: right; font-size: 0.85rem; color: #e8b86d; font-weight: bold; flex-shrink: 0; }
+
+    footer {
+      text-align: center;
+      margin-top: 24px;
+      color: #5c3a1e;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Westfield Coffee Co.</h1>
+  <p>Daily Sales Report &mdash; Yesterday: April 13, 2026 &nbsp;|&nbsp; Timezone: UTC &nbsp;|&nbsp; Store: Westfield</p>
+</header>
+
+<!-- Summary Cards -->
+<div class="summary-grid">
+  <div class="card">
+    <div class="label">Total Revenue</div>
+    <div class="amount">$3,412</div>
+    <div class="up">+8.4% vs last week</div>
+  </div>
+  <div class="card">
+    <div class="label">Total Orders</div>
+    <div class="amount">387</div>
+    <div class="up">+22 orders vs avg</div>
+  </div>
+  <div class="card">
+    <div class="label">Avg Order Value</div>
+    <div class="amount">$8.81</div>
+    <div class="up">+$0.43 vs last week</div>
+  </div>
+  <div class="card">
+    <div class="label">Hot Drinks</div>
+    <div class="amount">$1,840</div>
+    <div class="sub">53.9% of revenue</div>
+  </div>
+  <div class="card">
+    <div class="label">Cold Drinks</div>
+    <div class="amount">$940</div>
+    <div class="sub">27.6% of revenue</div>
+  </div>
+  <div class="card">
+    <div class="label">Food Items</div>
+    <div class="amount">$632</div>
+    <div class="sub">18.5% of revenue</div>
+  </div>
+</div>
+
+<!-- Sales by Hour Bar Chart -->
+<div class="section-title">Sales by Hour</div>
+<div class="bar-wrap">
+  <div class="bar-row">
+    <div class="bar-label">7:00 – 8:00 AM</div>
+    <div class="bar-track"><div class="bar-fill" style="width:42%"></div></div>
+    <div class="bar-val">$143</div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">8:00 – 9:00 AM</div>
+    <div class="bar-track"><div class="bar-fill" style="width:78%"></div></div>
+    <div class="bar-val">$528</div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">9:00 – 10:00 AM</div>
+    <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+    <div class="bar-val">$680</div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">10:00 – 11:00 AM</div>
+    <div class="bar-track"><div class="bar-fill" style="width:65%"></div></div>
+    <div class="bar-val">$441</div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">11:00 AM – 12:00 PM</div>
+    <div class="bar-track"><div class="bar-fill" style="width:55%"></div></div>
+    <div class="bar-val">$374</div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">12:00 – 1:00 PM</div>
+    <div class="bar-track"><div class="bar-fill" style="width:72%"></div></div>
+    <div class="bar-val">$489</div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">1:00 – 2:00 PM</div>
+    <div class="bar-track"><div class="bar-fill" style="width:48%"></div></div>
+    <div class="bar-val">$326</div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">2:00 – 3:00 PM</div>
+    <div class="bar-track"><div class="bar-fill" style="width:38%"></div></div>
+    <div class="bar-val">$258</div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">3:00 – 4:00 PM</div>
+    <div class="bar-track"><div class="bar-fill" style="width:25%"></div></div>
+    <div class="bar-val">$173</div>
+  </div>
+</div>
+
+<!-- Item Breakdown Table -->
+<div class="section-title">Item-by-Item Sales Breakdown</div>
+<table>
+  <thead>
+    <tr>
+      <th>Item</th>
+      <th>Category</th>
+      <th>Units Sold</th>
+      <th>Unit Price</th>
+      <th>Revenue</th>
+      <th>vs Yesterday</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Caramel Latte</td>
+      <td><span class="badge hot">Hot</span></td>
+      <td>74</td>
+      <td>$6.50</td>
+      <td>$481.00</td>
+      <td style="color:#6de8a0">+12%</td>
+    </tr>
+    <tr>
+      <td>Americano</td>
+      <td><span class="badge hot">Hot</span></td>
+      <td>68</td>
+      <td>$4.75</td>
+      <td>$323.00</td>
+      <td style="color:#6de8a0">+5%</td>
+    </tr>
+    <tr>
+      <td>Cappuccino</td>
+      <td><span class="badge hot">Hot</span></td>
+      <td>52</td>
+      <td>$5.50</td>
+      <td>$286.00</td>
+      <td style="color:#e86d6d">-3%</td>
+    </tr>
+    <tr>
+      <td>Flat White</td>
+      <td><span class="badge hot">Hot</span></td>
+      <td>41</td>
+      <td>$5.75</td>
+      <td>$235.75</td>
+      <td style="color:#6de8a0">+8%</td>
+    </tr>
+    <tr>
+      <td>Hot Chocolate</td>
+      <td><span class="badge hot">Hot</span></td>
+      <td>38</td>
+      <td>$5.25</td>
+      <td>$199.50</td>
+      <td style="color:#6de8a0">+2%</td>
+    </tr>
+    <tr>
+      <td>Iced Caramel Macchiato</td>
+      <td><span class="badge cold">Cold</span></td>
+      <td>47</td>
+      <td>$7.00</td>
+      <td>$329.00</td>
+      <td style="color:#6de8a0">+18%</td>
+    </tr>
+    <tr>
+      <td>Cold Brew</td>
+      <td><span class="badge cold">Cold</span></td>
+      <td>35</td>
+      <td>$6.25</td>
+      <td>$218.75</td>
+      <td style="color:#6de8a0">+9%</td>
+    </tr>
+    <tr>
+      <td>Iced Latte</td>
+      <td><span class="badge cold">Cold</span></td>
+      <td>29</td>
+      <td>$6.50</td>
+      <td>$188.50</td>
+      <td style="color:#e86d6d">-1%</td>
+    </tr>
+    <tr>
+      <td>Frappuccino Blend</td>
+      <td><span class="badge cold">Cold</span></td>
+      <td>18</td>
+      <td>$7.50</td>
+      <td>$135.00</td>
+      <td style="color:#6de8a0">+4%</td>
+    </tr>
+    <tr>
+      <td>Spring Blossom Latte</td>
+      <td><span class="badge seasonal">Seasonal</span></td>
+      <td>22</td>
+      <td>$7.25</td>
+      <td>$159.50</td>
+      <td style="color:#6de8a0">+31%</td>
+    </tr>
+    <tr>
+      <td>Butter Croissant</td>
+      <td><span class="badge food">Food</span></td>
+      <td>63</td>
+      <td>$3.75</td>
+      <td>$236.25</td>
+      <td style="color:#6de8a0">+7%</td>
+    </tr>
+    <tr>
+      <td>Blueberry Muffin</td>
+      <td><span class="badge food">Food</span></td>
+      <td>44</td>
+      <td>$3.50</td>
+      <td>$154.00</td>
+      <td style="color:#e86d6d">-6%</td>
+    </tr>
+    <tr>
+      <td>Avocado Toast</td>
+      <td><span class="badge food">Food</span></td>
+      <td>21</td>
+      <td>$9.50</td>
+      <td>$199.50</td>
+      <td style="color:#6de8a0">+14%</td>
+    </tr>
+    <tr>
+      <td>Banana Bread Slice</td>
+      <td><span class="badge food">Food</span></td>
+      <td>17</td>
+      <td>$2.50</td>
+      <td>$42.50</td>
+      <td style="color:#e86d6d">-2%</td>
+    </tr>
+    <tr class="total-row">
+      <td colspan="2">TOTAL</td>
+      <td>569 units</td>
+      <td>—</td>
+      <td>$3,188.25</td>
+      <td style="color:#6de8a0">+8.4%</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Payment Method Breakdown -->
+<div class="section-title">Payment Methods</div>
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Transactions</th>
+      <th>Revenue</th>
+      <th>Share</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Card (Contactless)</td>
+      <td>198</td>
+      <td>$1,743.00</td>
+      <td>51.1%</td>
+    </tr>
+    <tr>
+      <td>Mobile Pay (Apple/Google)</td>
+      <td>112</td>
+      <td>$986.00</td>
+      <td>28.9%</td>
+    </tr>
+    <tr>
+      <td>Cash</td>
+      <td>57</td>
+      <td>$502.00</td>
+      <td>14.7%</td>
+    </tr>
+    <tr>
+      <td>Loyalty App</td>
+      <td>20</td>
+      <td>$181.00</td>
+      <td>5.3%</td>
+    </tr>
+    <tr class="total-row">
+      <td>TOTAL</td>
+      <td>387</td>
+      <td>$3,412.00</td>
+      <td>100%</td>
+    </tr>
+  </tbody>
+</table>
+
+<footer>
+  Westfield Coffee Co. &mdash; Daily Sales Report &mdash; April 13, 2026 &mdash; UTC &mdash; Internal Use Only
+</footer>
+
+</body>
+</html>

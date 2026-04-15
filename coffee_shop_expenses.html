@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Westfield Coffee Co. — Business Expenses</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a0a00;
+      color: #f5e6d0;
+      padding: 30px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    header h1 {
+      font-size: 2.2rem;
+      color: #e8b86d;
+      letter-spacing: 2px;
+    }
+    header p {
+      color: #c4956a;
+      font-size: 0.95rem;
+      margin-top: 4px;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+    .card {
+      background: #2c1a0e;
+      border: 1px solid #5c3a1e;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .card .label { font-size: 0.8rem; color: #c4956a; text-transform: uppercase; }
+    .card .amount { font-size: 1.8rem; font-weight: bold; color: #e8b86d; margin-top: 6px; }
+    .card .sub { font-size: 0.75rem; color: #8a6a50; margin-top: 4px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #2c1a0e;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    th {
+      background: #5c3a1e;
+      color: #e8b86d;
+      padding: 14px 16px;
+      text-align: left;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #3d2410;
+      font-size: 0.95rem;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #3d2410; }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .badge.supplies   { background: #4a2c0a; color: #e8b86d; }
+    .badge.dairy      { background: #0a2c1a; color: #6de8b8; }
+    .badge.equipment  { background: #2c0a2c; color: #e86de8; }
+    .badge.utilities  { background: #0a1a2c; color: #6db8e8; }
+    .badge.other      { background: #2c2c0a; color: #e8e86d; }
+    .total-row td {
+      font-weight: bold;
+      color: #e8b86d;
+      background: #3d2410;
+      font-size: 1rem;
+    }
+    footer {
+      text-align: center;
+      margin-top: 24px;
+      color: #5c3a1e;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Westfield Coffee Co.</h1>
+  <p>Business Expense Report &mdash; April 2026 &nbsp;|&nbsp; Timezone: UTC</p>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <div class="label">Total Expenses</div>
+    <div class="amount">$2,847</div>
+    <div class="sub">This month</div>
+  </div>
+  <div class="card">
+    <div class="label">Coffee Supplies</div>
+    <div class="amount">$980</div>
+    <div class="sub">Beans, cups, syrups</div>
+  </div>
+  <div class="card">
+    <div class="label">Dairy & Milk</div>
+    <div class="amount">$430</div>
+    <div class="sub">Whole, oat, almond</div>
+  </div>
+  <div class="card">
+    <div class="label">Utilities</div>
+    <div class="amount">$620</div>
+    <div class="sub">Electric, water, internet</div>
+  </div>
+  <div class="card">
+    <div class="label">Equipment</div>
+    <div class="amount">$540</div>
+    <div class="sub">Maintenance & tools</div>
+  </div>
+  <div class="card">
+    <div class="label">Other</div>
+    <div class="amount">$277</div>
+    <div class="sub">Misc. costs</div>
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Item</th>
+      <th>Category</th>
+      <th>Vendor</th>
+      <th>Qty</th>
+      <th>Cost</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Apr 01</td>
+      <td>Arabica Coffee Beans (20 lbs)</td>
+      <td><span class="badge supplies">Supplies</span></td>
+      <td>Bean Bros Wholesale</td>
+      <td>4 bags</td>
+      <td>$280.00</td>
+    </tr>
+    <tr>
+      <td>Apr 01</td>
+      <td>Whole Milk (1 gal)</td>
+      <td><span class="badge dairy">Dairy</span></td>
+      <td>Local Dairy Co.</td>
+      <td>20 gal</td>
+      <td>$90.00</td>
+    </tr>
+    <tr>
+      <td>Apr 02</td>
+      <td>Oat Milk Cartons</td>
+      <td><span class="badge dairy">Dairy</span></td>
+      <td>Oatly Distributor</td>
+      <td>30 units</td>
+      <td>$120.00</td>
+    </tr>
+    <tr>
+      <td>Apr 03</td>
+      <td>Vanilla &amp; Caramel Syrups</td>
+      <td><span class="badge supplies">Supplies</span></td>
+      <td>Monin Wholesale</td>
+      <td>6 bottles</td>
+      <td>$95.00</td>
+    </tr>
+    <tr>
+      <td>Apr 05</td>
+      <td>Espresso Machine Service</td>
+      <td><span class="badge equipment">Equipment</span></td>
+      <td>ProCafe Technicians</td>
+      <td>1 visit</td>
+      <td>$320.00</td>
+    </tr>
+    <tr>
+      <td>Apr 07</td>
+      <td>Paper Cups (12oz, 16oz)</td>
+      <td><span class="badge supplies">Supplies</span></td>
+      <td>PackPro Supplies</td>
+      <td>1000 units</td>
+      <td>$180.00</td>
+    </tr>
+    <tr>
+      <td>Apr 10</td>
+      <td>Electricity Bill</td>
+      <td><span class="badge utilities">Utilities</span></td>
+      <td>City Power</td>
+      <td>—</td>
+      <td>$310.00</td>
+    </tr>
+    <tr>
+      <td>Apr 10</td>
+      <td>Water &amp; Sewage</td>
+      <td><span class="badge utilities">Utilities</span></td>
+      <td>City Water</td>
+      <td>—</td>
+      <td>$85.00</td>
+    </tr>
+    <tr>
+      <td>Apr 12</td>
+      <td>Almond Milk</td>
+      <td><span class="badge dairy">Dairy</span></td>
+      <td>Silk Wholesale</td>
+      <td>15 units</td>
+      <td>$75.00</td>
+    </tr>
+    <tr>
+      <td>Apr 12</td>
+      <td>Coffee Grinder Blades</td>
+      <td><span class="badge equipment">Equipment</span></td>
+      <td>ProCafe Technicians</td>
+      <td>2 sets</td>
+      <td>$220.00</td>
+    </tr>
+    <tr>
+      <td>Apr 13</td>
+      <td>Robusta Blend Beans (15 lbs)</td>
+      <td><span class="badge supplies">Supplies</span></td>
+      <td>Bean Bros Wholesale</td>
+      <td>3 bags</td>
+      <td>$215.00</td>
+    </tr>
+    <tr>
+      <td>Apr 14</td>
+      <td>Internet &amp; POS System</td>
+      <td><span class="badge utilities">Utilities</span></td>
+      <td>TechServ</td>
+      <td>—</td>
+      <td>$225.00</td>
+    </tr>
+    <tr>
+      <td>Apr 14</td>
+      <td>Cleaning Supplies</td>
+      <td><span class="badge other">Other</span></td>
+      <td>CleanPro</td>
+      <td>1 kit</td>
+      <td>$57.00</td>
+    </tr>
+    <tr>
+      <td>Apr 14</td>
+      <td>Staff Uniforms (aprons)</td>
+      <td><span class="badge other">Other</span></td>
+      <td>UniFirst</td>
+      <td>5 pcs</td>
+      <td>$125.00</td>
+    </tr>
+    <tr>
+      <td>Apr 14</td>
+      <td>Napkins &amp; Stirrers</td>
+      <td><span class="badge supplies">Supplies</span></td>
+      <td>PackPro Supplies</td>
+      <td>500 units</td>
+      <td>$95.00</td>
+    </tr>
+    <tr>
+      <td>Apr 14</td>
+      <td>Misc. Store Expenses</td>
+      <td><span class="badge other">Other</span></td>
+      <td>Various</td>
+      <td>—</td>
+      <td>$95.00</td>
+    </tr>
+    <tr class="total-row">
+      <td colspan="5">TOTAL</td>
+      <td>$2,847.00</td>
+    </tr>
+  </tbody>
+</table>
+
+<footer>
+  Westfield Coffee Co. &mdash; Internal Use Only &mdash; UTC &mdash; April 2026
+</footer>
+
+</body>
+</html>

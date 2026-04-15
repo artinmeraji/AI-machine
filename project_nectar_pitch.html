@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Project Nectar — Sales Pitch</title>
+  <style>
+    :root {
+      --gold:    #e8b86d;
+      --gold2:   #f5d38a;
+      --dark:    #c4956a;
+      --dim:     #8a6a50;
+      --bg:      #0a0500;
+      --surface: #120900;
+      --card:    #1c1006;
+      --border:  #2e1a08;
+      --green:   #5de8a0;
+      --red:     #e86d6d;
+      --blue:    #6db8e8;
+      --purple:  #c46de8;
+      --white:   #f5e6d0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--white);
+      overflow-x: hidden;
+    }
+
+    /* ── PROGRESS BAR ─── */
+    #progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--green));
+      z-index: 999;
+      transition: width 0.2s;
+      width: 0%;
+    }
+
+    /* ── NAV DOTS ─── */
+    .nav-dots {
+      position: fixed;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 200;
+    }
+    .nav-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+      border: 1px solid var(--dim);
+    }
+    .nav-dot.active {
+      background: var(--gold);
+      transform: scale(1.4);
+      border-color: var(--gold);
+    }
+
+    /* ── SLIDE BASE ─── */
+    .slide {
+      min-height: 100vh;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide-inner {
+      max-width: 960px;
+      width: 100%;
+      z-index: 2;
+    }
+
+    /* ── BG GLOW ─── */
+    .glow {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.12;
+      pointer-events: none;
+    }
+
+    /* ── SLIDE 1: HERO ─── */
+    #s1 { background: var(--bg); text-align: center; }
+    #s1 .eyebrow {
+      font-size: 0.75rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 28px;
+    }
+    #s1 h1 {
+      font-size: clamp(3rem, 7vw, 6rem);
+      font-weight: 800;
+      line-height: 1.05;
+      color: var(--gold2);
+      letter-spacing: -2px;
+      margin-bottom: 16px;
+    }
+    #s1 h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--gold2), var(--green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    #s1 .sub {
+      font-size: 1.15rem;
+      color: var(--dark);
+      max-width: 560px;
+      margin: 0 auto 40px;
+      line-height: 1.7;
+    }
+    #s1 .tagline {
+      display: inline-flex;
+      gap: 32px;
+      font-size: 0.82rem;
+      color: var(--dim);
+    }
+    #s1 .tagline span { color: var(--gold); font-weight: 600; }
+    .scroll-hint {
+      position: absolute;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.7rem;
+      color: var(--dim);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      animation: bounce 2s infinite;
+    }
+    .scroll-hint::after {
+      content: '';
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(var(--gold), transparent);
+    }
+    @keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
+
+    /* ── SLIDE 2: TRUTH ─── */
+    #s2 { background: var(--surface); }
+    .truth-statement {
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      font-weight: 700;
+      line-height: 1.35;
+      color: var(--white);
+      margin-bottom: 40px;
+    }
+    .truth-statement mark {
+      background: none;
+      color: var(--gold2);
+    }
+    .stat-blocks {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 40px;
+    }
+    .stat-block {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px 20px;
+    }
+    .stat-block .big {
+      font-size: 2.4rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .stat-block .desc { font-size: 0.8rem; color: var(--dim); line-height: 1.5; }
+    .lbl-sm {
+      font-size: 0.68rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 14px;
+      display: block;
+    }
+
+    /* ── SLIDE 3: CORE PROMISE ─── */
+    #s3 { background: var(--bg); }
+    .promise-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-top: 32px;
+    }
+    .promise-left h2 {
+      font-size: clamp(1.8rem, 3vw, 2.8rem);
+      font-weight: 800;
+      line-height: 1.2;
+      color: var(--gold2);
+      margin-bottom: 20px;
+    }
+    .promise-left p { font-size: 1rem; color: var(--dark); line-height: 1.8; }
+    .promise-right {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      justify-content: center;
+    }
+    .prom-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-size: 0.95rem;
+    }
+    .prom-icon {
+      font-size: 1.4rem;
+      width: 40px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .prom-text strong { display: block; color: var(--gold); font-size: 0.95rem; }
+    .prom-text span { font-size: 0.78rem; color: var(--dim); }
+    .channel-pills {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .pill {
+      padding: 8px 18px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: 1px solid;
+    }
+    .pill-green { border-color: var(--green); color: var(--green); background: rgba(93,232,160,0.06); }
+    .pill-blue  { border-color: var(--blue);  color: var(--blue);  background: rgba(109,184,232,0.06); }
+    .pill-dim   { border-color: var(--border); color: var(--dim);  }
+
+    /* ── PILLAR SLIDES ─── */
+    .pillar-slide { background: var(--surface); }
+    .pillar-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+    .pillar-num-big {
+      font-size: 5rem;
+      font-weight: 900;
+      line-height: 1;
+      opacity: 0.12;
+      position: absolute;
+      right: 80px;
+      top: 50px;
+    }
+    .pillar-badge {
+      font-size: 0.7rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 700;
+    }
+    .pb-gold   { background: #3a2000; color: var(--gold); }
+    .pb-green  { background: #003a1a; color: var(--green); }
+    .pb-blue   { background: #001a3a; color: var(--blue); }
+    .pb-purple { background: #1a003a; color: var(--purple); }
+    .pillar-title {
+      font-size: clamp(1.4rem, 2.5vw, 2rem);
+      font-weight: 800;
+      color: var(--white);
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .feat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .feat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 3px;
+    }
+    .fc-gold::before   { background: linear-gradient(90deg, var(--gold-dark, #3d2000), var(--gold)); }
+    .fc-green::before  { background: linear-gradient(90deg, #003a1a, var(--green)); }
+    .fc-blue::before   { background: linear-gradient(90deg, #001a3a, var(--blue)); }
+    .fc-purple::before { background: linear-gradient(90deg, #1a003a, var(--purple)); }
+    .feat-card h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 10px;
+    }
+    .feat-card p { font-size: 0.8rem; color: var(--dim); line-height: 1.6; }
+    .impact-line {
+      margin-top: 14px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+    .il-gold   { background: #3a2000; color: var(--gold); }
+    .il-green  { background: #003a1a; color: var(--green); }
+    .il-blue   { background: #001a3a; color: var(--blue); }
+    .il-purple { background: #1a003a; color: var(--purple); }
+
+    /* ── SLIDE: EDGE ─── */
+    #s8 { background: var(--bg); }
+    .vs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 32px;
+    }
+    .vs-col h3 {
+      font-size: 0.72rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .vs-col.bad h3  { color: var(--red); border-color: #3a0000; }
+    .vs-col.good h3 { color: var(--green); border-color: #003a1a; }
+    .vs-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.88rem;
+    }
+    .vs-row:last-child { border-bottom: none; }
+    .vs-icon { font-size: 1rem; width: 24px; text-align: center; flex-shrink: 0; }
+    .vs-row.bad-row  { color: var(--dim); }
+    .vs-row.good-row { color: var(--white); }
+
+    /* ── SLIDE: PRICING ─── */
+    #s9 { background: var(--surface); }
+    .pricing-quote {
+      font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+      font-weight: 700;
+      line-height: 1.5;
+      color: var(--white);
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 40px;
+    }
+    .pricing-quote mark {
+      background: none;
+      color: var(--green);
+    }
+    .pricing-quote em {
+      display: block;
+      font-size: 0.75rem;
+      font-style: normal;
+      color: var(--dim);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 10px;
+    }
+    .buy-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 0 auto;
+      max-width: 700px;
+    }
+    .buy-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px 20px;
+      text-align: center;
+    }
+    .buy-item .icon { font-size: 2rem; margin-bottom: 10px; }
+    .buy-item h4 { color: var(--gold); font-size: 1.1rem; margin-bottom: 6px; }
+    .buy-item p  { color: var(--dim); font-size: 0.78rem; }
+    .nobody-list {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+    .nobody-pill {
+      padding: 8px 18px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      border: 1px solid var(--border);
+      color: var(--dim);
+      text-decoration: line-through;
+    }
+
+    /* ── SLIDE: CLOSE ─── */
+    #s10 {
+      background: radial-gradient(ellipse at center, #1c0e04 0%, var(--bg) 70%);
+      text-align: center;
+    }
+    #s10 h2 {
+      font-size: clamp(2rem, 5vw, 4rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -1px;
+      color: var(--gold2);
+      margin-bottom: 24px;
+    }
+    #s10 .lines {
+      font-size: 1.1rem;
+      color: var(--dark);
+      line-height: 2;
+      max-width: 560px;
+      margin: 0 auto 36px;
+    }
+    #s10 .lines strong { color: var(--white); }
+    #s10 .final-hook {
+      display: inline-block;
+      background: linear-gradient(135deg, #1c0e04, #2c1a08);
+      border: 1px solid var(--gold);
+      border-radius: 14px;
+      padding: 28px 40px;
+      max-width: 620px;
+      margin: 0 auto;
+    }
+    #s10 .final-hook p {
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--white);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    #s10 .final-hook .credit {
+      font-size: 0.75rem;
+      color: var(--dim);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-style: normal;
+    }
+    .cta-btn {
+      display: inline-block;
+      margin-top: 32px;
+      padding: 14px 40px;
+      background: linear-gradient(135deg, var(--gold), #c47a30);
+      color: var(--bg);
+      font-weight: 800;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border-radius: 8px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* ── SECTION LABELS ─── */
+    .section-label {
+      font-size: 0.68rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 12px;
+      display: block;
+    }
+    .big-heading {
+      font-size: clamp(1.6rem, 3vw, 2.6rem);
+      font-weight: 800;
+      color: var(--gold2);
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+    .sub-heading {
+      font-size: 0.95rem;
+      color: var(--dark);
+      margin-bottom: 28px;
+      max-width: 580px;
+      line-height: 1.7;
+    }
+
+    /* ── DIVIDER ─── */
+    hr.shine {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 24px 0;
+    }
+
+    @media (max-width: 768px) {
+      .slide { padding: 40px 24px; }
+      .stat-blocks, .features-grid, .buy-list { grid-template-columns: 1fr 1fr; }
+      .vs-grid, .promise-grid { grid-template-columns: 1fr; }
+      .nav-dots { right: 10px; }
+      .pillar-num-big { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<nav class="nav-dots" id="navDots"></nav>
+
+<!-- ══════════════════════════════════ SLIDE 1: HERO -->
+<section class="slide" id="s1" data-label="Intro">
+  <div class="glow" style="width:600px;height:600px;background:var(--gold);top:-100px;left:-100px;"></div>
+  <div class="glow" style="width:400px;height:400px;background:var(--green);bottom:-50px;right:-50px;"></div>
+  <div class="slide-inner" style="text-align:center;">
+    <p class="eyebrow">Westfield Coffee Co. &nbsp;·&nbsp; Confidential Sales Deck &nbsp;·&nbsp; 2026</p>
+    <h1>Project<br/><em>Nectar</em></h1>
+    <p class="sub">The Invisible Business Engine that turns your coffee shop into a 24/7 revenue machine — without hiring more staff or changing how customers behave.</p>
+    <div class="channel-pills" style="justify-content:center; margin-top:0;">
+      <span class="pill pill-green">WhatsApp</span>
+      <span class="pill pill-blue">Telegram</span>
+      <span class="pill pill-dim">No downloads</span>
+      <span class="pill pill-dim">No training</span>
+      <span class="pill pill-dim">No friction</span>
+    </div>
+  </div>
+  <div class="scroll-hint">Scroll</div>
+</section>
+
+<!-- ══════════════════════════════════ SLIDE 2: REALITY CHECK -->
+<section class="slide" id="s2" data-label="Reality">
+  <div class="glow" style="width:500px;height:500px;background:var(--red);top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.07;"></div>
+  <div class="slide-inner">
+    <span class="section-label">The Reality Check</span>
+    <div class="truth-statement">
+      Most small businesses don't have a tech problem.<br/>
+      They have a <mark>time and attention problem.</mark><br/>
+      <span style="font-size:0.6em; color:var(--dim); font-weight:400;">You're not selling AI. You're fixing <mark>leaks in the bucket.</mark></span>
+    </div>
+    <hr class="shine"/>
+    <span class="lbl-sm">The numbers that prove it</span>
+    <div class="stat-blocks">
+      <div class="stat-block">
+        <div class="big" style="color:var(--gold);">70%</div>
+        <div class="desc">of customers prefer messaging over apps or phone calls</div>
+      </div>
+      <div class="stat-block">
+        <div class="big" style="color:var(--red);">&lt;10%</div>
+        <div class="desc">adoption rate for most small business custom apps</div>
+      </div>
+      <div class="stat-block">
+        <div class="big" style="color:var(--red);">20–30%</div>
+        <div class="desc">of potential revenue lost to missed calls & slow replies</div>
+      </div>
+      <div class="stat-block">
+        <div class="big" style="color:var(--green);">60–70%</div>
+        <div class="desc">of revenue comes from repeat customers — most shops ignore them</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════ SLIDE 3: CORE PROMISE -->
+<section class="slide" id="s3" data-label="Promise">
+  <div class="glow" style="width:400px;height:400px;background:var(--gold);bottom:-100px;right:-100px;"></div>
+  <div class="slide-inner">
+    <div class="promise-grid">
+      <div class="promise-left">
+        <span class="section-label">What You Actually Sell</span>
+        <h2>A 24/7 Revenue Machine. Not Another Tool.</h2>
+        <p>Captures more orders. Retains more customers. Reduces operational chaos. Increases profit — without adding headcount.</p>
+        <p style="margin-top:14px;">It lives inside apps your customers already use. They don't change their behavior. Your revenue does.</p>
+        <div class="channel-pills">
+          <span class="pill pill-green">WhatsApp</span>
+          <span class="pill pill-blue">Telegram</span>
+        </div>
+      </div>
+      <div class="promise-right">
+        <div class="prom-item">
+          <div class="prom-icon">💰</div>
+          <div class="prom-text">
+            <strong>More Money</strong>
+            <span>Higher order volume, smarter upsells, instant broadcasts</span>
+          </div>
+        </div>
+        <div class="prom-item">
+          <div class="prom-icon">⏱️</div>
+          <div class="prom-text">
+            <strong>More Time</strong>
+            <span>Automated support, ordering, and follow-ups run 24/7</span>
+          </div>
+        </div>
+        <div class="prom-item">
+          <div class="prom-icon">😌</div>
+          <div class="prom-text">
+            <strong>Fewer Headaches</strong>
+            <span>Less chaos, less waste, less guessing — more control</span>
+          </div>
+        </div>
+        <div class="prom-item">
+          <div class="prom-icon">🔒</div>
+          <div class="prom-text">
+            <strong>You Stay In Charge</strong>
+            <span>The system runs the machine. You run the business.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════ SLIDE 4: PILLAR 1 -->
+<section class="slide pillar-slide" id="s4" data-label="Revenue">
+  <div class="pillar-num-big" style="color:var(--gold);">01</div>
+  <div class="slide-inner">
+    <div class="pillar-header">
+      <span class="pillar-badge pb-gold">Pillar 1</span>
+      <h2 class="pillar-title">Revenue Engine &mdash; Get More Money In</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card fc-gold">
+        <h4>Conversational Ordering</h4>
+        <p>Customer texts → AI takes order → confirms → handles payment → gives pickup time.<br/><br/>No app. No line. No confusion. Works in WhatsApp & Telegram from day one.</p>
+        <span class="impact-line il-gold">Faster service · More orders · Less staff bottleneck</span>
+      </div>
+      <div class="feat-card fc-gold">
+        <h4>Smart Upselling</h4>
+        <p>"Add a pastry for $2?" — not randomly, based on customer behavior. Every transaction is an opportunity the system never misses.</p>
+        <span class="impact-line il-gold">+10–25% average order value</span>
+      </div>
+      <div class="feat-card fc-gold">
+        <h4>Broadcast Sales System</h4>
+        <p>One click → instant message to your best customers. "Fresh batch just arrived." "Happy hour 3–5 PM." Traffic spikes on demand.</p>
+        <span class="impact-line il-gold">Instant revenue when you need it</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════ SLIDE 5: PILLAR 2 -->
+<section class="slide pillar-slide" id="s5" data-label="Retention">
+  <div class="pillar-num-big" style="color:var(--green);">02</div>
+  <div class="slide-inner">
+    <div class="pillar-header">
+      <span class="pillar-badge pb-green">Pillar 2</span>
+      <h2 class="pillar-title">Retention Engine &mdash; Stop Losing Customers</h2>
+    </div>
+    <div class="features-grid" style="grid-template-columns:1fr 1fr; max-width:640px;">
+      <div class="feat-card fc-green">
+        <h4>Automated Review Funnel</h4>
+        <p>Happy customer → routed to Google or Yelp.<br/>Unhappy customer → private alert to you before they post publicly.<br/><br/>Problems fixed before they go viral.</p>
+        <span class="impact-line il-green">Higher ratings · Zero surprises</span>
+      </div>
+      <div class="feat-card fc-green">
+        <h4>Loyalty Intelligence</h4>
+        <p>System identifies your top customers — and the ones disappearing. Triggers "We miss you" offers and personalized incentives automatically. No manual work.</p>
+        <span class="impact-line il-green">More repeat visits · Higher lifetime value</span>
+      </div>
+    </div>
+    <div style="margin-top:20px; padding:20px 24px; background:var(--card); border:1px solid #003a1a; border-radius:12px; max-width:640px; color:var(--dim); font-size:0.9rem; line-height:1.7;">
+      60–70% of your revenue comes from repeat customers. <strong style="color:var(--white);">Most coffee shops have no system for keeping them.</strong> This is that system.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════ SLIDE 6: PILLAR 3 -->
+<section class="slide pillar-slide" id="s6" data-label="Operations">
+  <div class="pillar-num-big" style="color:var(--blue);">03</div>
+  <div class="slide-inner">
+    <div class="pillar-header">
+      <span class="pillar-badge pb-blue">Pillar 3</span>
+      <h2 class="pillar-title">Operations Engine &mdash; Less Chaos, Less Waste</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card fc-blue">
+        <h4>Smart Waste Reduction</h4>
+        <p>Tracks what gets thrown away and when. Suggests discounts at the right time and inventory adjustments before it becomes waste.</p>
+        <span class="impact-line il-blue">Lower waste · Higher margins</span>
+      </div>
+      <div class="feat-card fc-blue">
+        <h4>Real-Time Problem Solver</h4>
+        <p>"Milk delivery didn't arrive." The system responds with backup vendors, inventory impact, and the best immediate action. No panic, just answers.</p>
+        <span class="impact-line il-blue">Faster decisions under pressure</span>
+      </div>
+      <div class="feat-card fc-blue">
+        <h4>24/7 Customer Support</h4>
+        <p>Handles "Are you open?" and "Do you have Wi-Fi?" automatically, around the clock. Staff focuses on real work, not repetitive questions.</p>
+        <span class="impact-line il-blue">No lost customers from slow replies</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════ SLIDE 7: PILLAR 4 -->
+<section class="slide pillar-slide" id="s7" data-label="Control">
+  <div class="pillar-num-big" style="color:var(--purple);">04</div>
+  <div class="slide-inner">
+    <div class="pillar-header">
+      <span class="pillar-badge pb-purple">Pillar 4</span>
+      <h2 class="pillar-title">Control Engine &mdash; You Stay In Charge</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card fc-purple">
+        <h4>Digital Clone Assistant</h4>
+        <p>Writes emails, promotions, and internal messages in your tone, not generic AI-speak. Not magic — just speed. You review and send.</p>
+        <span class="impact-line il-purple">Your voice, always on</span>
+      </div>
+      <div class="feat-card fc-purple">
+        <h4>Compliance Monitor</h4>
+        <p>California-specific. Tracks labor laws and health regulations. Tells you what needs fixing before an inspector does. Audit-ready, always.</p>
+        <span class="impact-line il-purple">Avoid fines · Stay audit-ready</span>
+      </div>
+      <div class="feat-card fc-purple">
+        <h4>Business Growth Insights</h4>
+        <p>Simple math, not MBA nonsense. "Cut labor 5% → afford a second location in 18 months." Clear decisions, not guessing games.</p>
+        <span class="impact-line il-purple">Clear decisions, not guessing</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════ SLIDE 8: YOUR EDGE -->
+<section class="slide" id="s8" data-label="Edge">
+  <div class="glow" style="width:500px;height:500px;background:var(--green);top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+  <div class="slide-inner">
+    <span class="section-label">Why This Is Different</span>
+    <div class="big-heading">Every Other Solution<br/>vs. Project Nectar</div>
+    <div class="vs-grid">
+      <div class="vs-col bad">
+        <h3>Every other solution</h3>
+        <div class="vs-row bad-row"><span class="vs-icon">✗</span> Another app nobody downloads</div>
+        <div class="vs-row bad-row"><span class="vs-icon">✗</span> Another dashboard nobody logs into</div>
+        <div class="vs-row bad-row"><span class="vs-icon">✗</span> Another login nobody remembers</div>
+        <div class="vs-row bad-row"><span class="vs-icon">✗</span> Weeks of onboarding and training</div>
+        <div class="vs-row bad-row"><span class="vs-icon">✗</span> Forces behavior change on customers</div>
+        <div class="vs-row bad-row"><span class="vs-icon">✗</span> "Cool idea" — no urgency to buy</div>
+      </div>
+      <div class="vs-col good">
+        <h3>Project Nectar</h3>
+        <div class="vs-row good-row"><span class="vs-icon" style="color:var(--green);">✓</span> Lives in WhatsApp & Telegram — already on every phone</div>
+        <div class="vs-row good-row"><span class="vs-icon" style="color:var(--green);">✓</span> Zero friction for customers</div>
+        <div class="vs-row good-row"><span class="vs-icon" style="color:var(--green);">✓</span> No downloads, no training</div>
+        <div class="vs-row good-row"><span class="vs-icon" style="color:var(--green);">✓</span> Works from day one</div>
+        <div class="vs-row good-row"><span class="vs-icon" style="color:var(--green);">✓</span> Requires zero behavior change</div>
+        <div class="vs-row good-row"><span class="vs-icon" style="color:var(--green);">✓</span> "How much am I losing without this?" — urgency built in</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════ SLIDE 9: PRICING -->
+<section class="slide" id="s9" data-label="Pricing">
+  <div class="glow" style="width:400px;height:400px;background:var(--gold);top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+  <div class="slide-inner" style="text-align:center;">
+    <span class="section-label">Pricing Logic — This Is Where You Win or Die</span>
+
+    <div class="nobody-list">
+      <span class="nobody-pill">AI assistant</span>
+      <span class="nobody-pill">15 tools</span>
+      <span class="nobody-pill">omnipresence</span>
+      <span class="nobody-pill">smart automation</span>
+    </div>
+
+    <div class="pricing-quote">
+      "If this system doesn't generate or save you at least <mark>5x what you pay for it</mark>, you shouldn't use it."
+      <em>The only pricing line that builds credibility</em>
+    </div>
+
+    <hr class="shine" style="max-width:600px; margin:0 auto 32px;"/>
+
+    <span class="lbl-sm">What owners actually buy</span>
+    <div class="buy-list">
+      <div class="buy-item">
+        <div class="icon">💵</div>
+        <h4>More Money</h4>
+        <p>Higher AOV, more orders, instant traffic spikes</p>
+      </div>
+      <div class="buy-item">
+        <div class="icon">🕐</div>
+        <h4>Less Stress</h4>
+        <p>Problems solved before they escalate, 24/7</p>
+      </div>
+      <div class="buy-item">
+        <div class="icon">🎛️</div>
+        <h4>Control</h4>
+        <p>Full visibility without drowning in dashboards</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════ SLIDE 10: THE CLOSE -->
+<section class="slide" id="s10" data-label="Close">
+  <div class="glow" style="width:700px;height:700px;background:var(--gold);top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08;"></div>
+  <div class="slide-inner" style="text-align:center;">
+    <h2>You don't need<br/>more staff.</h2>
+    <div class="lines">
+      You don't need another app.<br/>
+      You don't need another dashboard nobody logs into.<br/><br/>
+      You need a system that <strong>captures every customer, every order, and every opportunity — automatically.</strong>
+    </div>
+    <div class="final-hook">
+      <p>"That's what this is. You stay the owner. <strong style="color:var(--gold)">This runs the machine.</strong>"</p>
+      <p style="font-size:0.95rem; color:var(--dim); font-style:normal; margin-bottom:0;">
+        When you pitch this right, a coffee shop owner doesn't think <em style="color:var(--dim)">"cool idea."</em><br/>
+        They think: <strong style="color:var(--gold2); font-size:1.05rem;">"How much am I losing by not having this?"</strong><br/>
+        <span style="font-size:0.78rem; color:var(--dim);">That's when you've got them.</span>
+      </p>
+    </div>
+    <button class="cta-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})">Back to Top</button>
+  </div>
+</section>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const navDots = document.getElementById('navDots');
+  const progressBar = document.getElementById('progress-bar');
+
+  // Build nav dots
+  slides.forEach((slide, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    dot.title = slide.dataset.label || '';
+    dot.addEventListener('click', () => slide.scrollIntoView({behavior:'smooth'}));
+    navDots.appendChild(dot);
+  });
+
+  const dots = document.querySelectorAll('.nav-dot');
+
+  // Intersection observer for active dot + progress
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const idx = Array.from(slides).indexOf(entry.target);
+        dots.forEach((d,i) => d.classList.toggle('active', i === idx));
+        const pct = ((idx) / (slides.length - 1)) * 100;
+        progressBar.style.width = pct + '%';
+      }
+    });
+  }, { threshold: 0.5 });
+
+  slides.forEach(s => io.observe(s));
+</script>
+</body>
+</html>

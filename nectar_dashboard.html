@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Project Nectar — Westfield Coffee Co.</title>
+  <style>
+    :root {
+      --bg:        #0f0800;
+      --surface:   #1c1006;
+      --card:      #251508;
+      --border:    #3d2410;
+      --gold:      #e8b86d;
+      --gold-dim:  #c4956a;
+      --gold-dark: #5c3a1e;
+      --green:     #6de8a0;
+      --red:       #e86d6d;
+      --blue:      #6db8e8;
+      --purple:    #c46de8;
+      --text:      #f5e6d0;
+      --muted:     #8a6a50;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ─────────────────────────────────── */
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 220px;
+      height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 28px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 100;
+    }
+    .sidebar-logo {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 1px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .sidebar-logo span { display: block; font-size: 0.7rem; color: var(--muted); font-weight: 400; margin-top: 2px; }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: var(--gold-dim);
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-item:hover, .nav-item.active {
+      background: var(--gold-dark);
+      color: var(--gold);
+    }
+    .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+    .nav-sep {
+      height: 1px;
+      background: var(--border);
+      margin: 10px 0;
+    }
+    .sidebar-tag {
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0 12px;
+      margin-top: 6px;
+    }
+
+    /* ── MAIN ─────────────────────────────────────── */
+    .main {
+      margin-left: 220px;
+      padding: 32px 36px;
+    }
+
+    /* ── TOP BAR ──────────────────────────────────── */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+    .topbar h1 { font-size: 1.6rem; color: var(--gold); }
+    .topbar p  { font-size: 0.85rem; color: var(--muted); margin-top: 3px; }
+    .badge-live {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 0.8rem;
+      color: var(--green);
+    }
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+    }
+
+    /* ── SECTION TITLE ────────────────────────────── */
+    .sec-title {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin: 36px 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sec-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── GRID ─────────────────────────────────────── */
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+    .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
+
+    /* ── CARD ─────────────────────────────────────── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+    }
+    .card-sm {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+    }
+    .card-title {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .card-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .card-sub {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+    .up   { color: var(--green); }
+    .down { color: var(--red); }
+
+    /* ── HOUR BAR ─────────────────────────────────── */
+    .hour-grid {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 100px;
+      padding-top: 10px;
+    }
+    .hour-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .hour-bar {
+      width: 100%;
+      border-radius: 5px 5px 0 0;
+      background: linear-gradient(180deg, var(--gold), var(--gold-dark));
+      transition: opacity 0.2s;
+    }
+    .hour-bar:hover { opacity: 0.75; }
+    .hour-label { font-size: 0.62rem; color: var(--muted); }
+    .hour-val   { font-size: 0.65rem; color: var(--gold); font-weight: 600; }
+
+    /* ── TABLE ────────────────────────────────────── */
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 10px 14px;
+      font-size: 0.88rem;
+      border-bottom: 1px solid #1e0f05;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    .total-row td { color: var(--gold); font-weight: 600; border-top: 1px solid var(--border); }
+
+    /* ── BADGE ────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .b-hot      { background: #4a1a0a; color: #e88d6d; }
+    .b-cold     { background: #0a1a3a; color: var(--blue); }
+    .b-food     { background: #1a3a0a; color: #a0e86d; }
+    .b-seasonal { background: #2c0a2c; color: var(--purple); }
+    .b-card     { background: #0a2a3a; color: var(--blue); }
+    .b-mobile   { background: #1a0a3a; color: var(--purple); }
+    .b-cash     { background: #1a2a0a; color: var(--green); }
+    .b-loyalty  { background: #3a1a0a; color: var(--gold); }
+
+    /* ── PROGRESS BAR ─────────────────────────────── */
+    .prog-wrap { margin-bottom: 14px; }
+    .prog-wrap:last-child { margin-bottom: 0; }
+    .prog-header { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.8rem; }
+    .prog-label { color: var(--gold-dim); }
+    .prog-val   { color: var(--gold); font-weight: 600; }
+    .prog-track { background: var(--border); border-radius: 6px; height: 8px; }
+    .prog-fill  {
+      height: 8px;
+      border-radius: 6px;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+    }
+
+    /* ── PILLAR CARDS ─────────────────────────────── */
+    .pillar {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+    .pillar::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px;
+      height: 100%;
+    }
+    .pillar.p-revenue::before { background: var(--gold); }
+    .pillar.p-retention::before { background: var(--green); }
+    .pillar.p-ops::before { background: var(--blue); }
+    .pillar.p-control::before { background: var(--purple); }
+    .pillar-num {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 6px;
+    }
+    .p-revenue .pillar-num   { color: var(--gold); }
+    .p-retention .pillar-num { color: var(--green); }
+    .p-ops .pillar-num       { color: var(--blue); }
+    .p-control .pillar-num   { color: var(--purple); }
+    .pillar h3 { font-size: 1rem; color: var(--text); margin-bottom: 12px; }
+    .pillar-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 0.82rem;
+      color: var(--gold-dim);
+    }
+    .pillar-item:last-child { margin-bottom: 0; }
+    .pillar-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+    .p-revenue .pillar-dot   { background: var(--gold); }
+    .p-retention .pillar-dot { background: var(--green); }
+    .p-ops .pillar-dot       { background: var(--blue); }
+    .p-control .pillar-dot   { background: var(--purple); }
+    .impact-tag {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .p-revenue .impact-tag   { background: #3a2000; color: var(--gold); }
+    .p-retention .impact-tag { background: #003a1a; color: var(--green); }
+    .p-ops .impact-tag       { background: #001a3a; color: var(--blue); }
+    .p-control .impact-tag   { background: #1a003a; color: var(--purple); }
+
+    /* ── QUOTE BLOCK ──────────────────────────────── */
+    .quote-block {
+      background: linear-gradient(135deg, #1c0e04, #251508);
+      border: 1px solid var(--gold-dark);
+      border-left: 4px solid var(--gold);
+      border-radius: 0 12px 12px 0;
+      padding: 20px 24px;
+      font-size: 1rem;
+      color: var(--text);
+      line-height: 1.6;
+      font-style: italic;
+    }
+    .quote-block span { display: block; margin-top: 8px; font-size: 0.75rem; color: var(--muted); font-style: normal; }
+
+    /* ── STAT ROW ─────────────────────────────────── */
+    .stat-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-label { color: var(--muted); }
+    .stat-val   { color: var(--gold); font-weight: 600; }
+
+    /* ── CLOSE SECTION ────────────────────────────── */
+    .close-section {
+      background: linear-gradient(135deg, #1c0e04 0%, #0f0800 100%);
+      border: 1px solid var(--gold-dark);
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      margin-top: 8px;
+    }
+    .close-section h2 {
+      font-size: 1.6rem;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+    .close-section p {
+      font-size: 1rem;
+      color: var(--gold-dim);
+      max-width: 560px;
+      margin: 0 auto 20px;
+      line-height: 1.7;
+    }
+    .close-section .hook {
+      font-size: 1.15rem;
+      color: var(--text);
+      font-weight: 600;
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+      margin-top: 20px;
+    }
+
+    /* ── FOOTER ───────────────────────────────────── */
+    footer {
+      text-align: center;
+      margin-top: 48px;
+      padding: 20px 0;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════ SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">NECTAR<span>Westfield Coffee Co.</span></div>
+
+  <div class="sidebar-tag">Overview</div>
+  <a class="nav-item active" href="#sales">
+    <span class="nav-icon">📊</span> Daily Sales
+  </a>
+  <a class="nav-item" href="#breakdown">
+    <span class="nav-icon">☕</span> Item Breakdown
+  </a>
+  <a class="nav-item" href="#payments">
+    <span class="nav-icon">💳</span> Payments
+  </a>
+
+  <div class="nav-sep"></div>
+  <div class="sidebar-tag">Business Engine</div>
+  <a class="nav-item" href="#why">
+    <span class="nav-icon">🎯</span> Why It Works
+  </a>
+  <a class="nav-item" href="#pillars">
+    <span class="nav-icon">⚙️</span> 4 Pillars
+  </a>
+  <a class="nav-item" href="#edge">
+    <span class="nav-icon">⚡</span> Your Edge
+  </a>
+  <a class="nav-item" href="#close">
+    <span class="nav-icon">🔒</span> The Close
+  </a>
+
+  <div class="nav-sep"></div>
+  <div class="nav-item" style="color:var(--muted); cursor:default; font-size:0.75rem;">
+    <span class="nav-icon">🕐</span> Apr 13, 2026 — UTC
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════ MAIN -->
+<div class="main">
+
+  <!-- TOP BAR -->
+  <div class="topbar" id="sales">
+    <div>
+      <h1>Project Nectar</h1>
+      <p>Daily Sales Report · Yesterday: April 13, 2026 · Westfield · UTC</p>
+    </div>
+    <div class="badge-live"><div class="dot"></div> Live Dashboard</div>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="grid-4">
+    <div class="card-sm">
+      <div class="card-title">Total Revenue</div>
+      <div class="card-value">$3,412</div>
+      <div class="card-sub up">+8.4% vs last week</div>
+    </div>
+    <div class="card-sm">
+      <div class="card-title">Total Orders</div>
+      <div class="card-value">387</div>
+      <div class="card-sub up">+22 orders vs avg</div>
+    </div>
+    <div class="card-sm">
+      <div class="card-title">Avg Order Value</div>
+      <div class="card-value">$8.81</div>
+      <div class="card-sub up">+$0.43 vs last week</div>
+    </div>
+    <div class="card-sm">
+      <div class="card-title">Units Sold</div>
+      <div class="card-value">569</div>
+      <div class="card-sub up">+14 units vs avg</div>
+    </div>
+  </div>
+
+  <!-- HOUR CHART + CATEGORY SPLIT -->
+  <div class="grid-2-1" style="margin-top:16px;">
+    <div class="card">
+      <div class="card-title" style="margin-bottom:14px;">Revenue by Hour — April 13</div>
+      <div class="hour-grid">
+        <div class="hour-col">
+          <div class="hour-val">$143</div>
+          <div class="hour-bar" style="height:21%"></div>
+          <div class="hour-label">7AM</div>
+        </div>
+        <div class="hour-col">
+          <div class="hour-val">$528</div>
+          <div class="hour-bar" style="height:78%"></div>
+          <div class="hour-label">8AM</div>
+        </div>
+        <div class="hour-col">
+          <div class="hour-val">$680</div>
+          <div class="hour-bar" style="height:100%"></div>
+          <div class="hour-label">9AM</div>
+        </div>
+        <div class="hour-col">
+          <div class="hour-val">$441</div>
+          <div class="hour-bar" style="height:65%"></div>
+          <div class="hour-label">10AM</div>
+        </div>
+        <div class="hour-col">
+          <div class="hour-val">$374</div>
+          <div class="hour-bar" style="height:55%"></div>
+          <div class="hour-label">11AM</div>
+        </div>
+        <div class="hour-col">
+          <div class="hour-val">$489</div>
+          <div class="hour-bar" style="height:72%"></div>
+          <div class="hour-label">12PM</div>
+        </div>
+        <div class="hour-col">
+          <div class="hour-val">$326</div>
+          <div class="hour-bar" style="height:48%"></div>
+          <div class="hour-label">1PM</div>
+        </div>
+        <div class="hour-col">
+          <div class="hour-val">$258</div>
+          <div class="hour-bar" style="height:38%"></div>
+          <div class="hour-label">2PM</div>
+        </div>
+        <div class="hour-col">
+          <div class="hour-val">$173</div>
+          <div class="hour-bar" style="height:25%"></div>
+          <div class="hour-label">3PM</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:18px;">Revenue Split</div>
+      <div class="prog-wrap">
+        <div class="prog-header"><span class="prog-label">Hot Drinks</span><span class="prog-val">$1,840 · 53.9%</span></div>
+        <div class="prog-track"><div class="prog-fill" style="width:53.9%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-header"><span class="prog-label">Cold Drinks</span><span class="prog-val">$940 · 27.6%</span></div>
+        <div class="prog-track"><div class="prog-fill" style="width:27.6%; background:linear-gradient(90deg,#003a5c,var(--blue))"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-header"><span class="prog-label">Food Items</span><span class="prog-val">$632 · 18.5%</span></div>
+        <div class="prog-track"><div class="prog-fill" style="width:18.5%; background:linear-gradient(90deg,#1a3a0a,#a0e86d)"></div></div>
+      </div>
+      <div style="margin-top:20px;">
+        <div class="stat-row"><span class="stat-label">Peak Hour</span><span class="stat-val">9–10 AM</span></div>
+        <div class="stat-row"><span class="stat-label">Slowest Hour</span><span class="stat-val">7–8 AM</span></div>
+        <div class="stat-row"><span class="stat-label">Top Performer</span><span class="stat-val">Caramel Latte</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ITEM TABLE -->
+  <div class="sec-title" id="breakdown">Item Breakdown</div>
+  <div class="card" style="padding:0; overflow:hidden;">
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Category</th>
+          <th>Units</th>
+          <th>Price</th>
+          <th>Revenue</th>
+          <th>vs Prior Day</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Caramel Latte</td><td><span class="badge b-hot">Hot</span></td><td>74</td><td>$6.50</td><td>$481.00</td><td class="up">+12%</td></tr>
+        <tr><td>Americano</td><td><span class="badge b-hot">Hot</span></td><td>68</td><td>$4.75</td><td>$323.00</td><td class="up">+5%</td></tr>
+        <tr><td>Cappuccino</td><td><span class="badge b-hot">Hot</span></td><td>52</td><td>$5.50</td><td>$286.00</td><td class="down">-3%</td></tr>
+        <tr><td>Flat White</td><td><span class="badge b-hot">Hot</span></td><td>41</td><td>$5.75</td><td>$235.75</td><td class="up">+8%</td></tr>
+        <tr><td>Hot Chocolate</td><td><span class="badge b-hot">Hot</span></td><td>38</td><td>$5.25</td><td>$199.50</td><td class="up">+2%</td></tr>
+        <tr><td>Iced Caramel Macchiato</td><td><span class="badge b-cold">Cold</span></td><td>47</td><td>$7.00</td><td>$329.00</td><td class="up">+18%</td></tr>
+        <tr><td>Cold Brew</td><td><span class="badge b-cold">Cold</span></td><td>35</td><td>$6.25</td><td>$218.75</td><td class="up">+9%</td></tr>
+        <tr><td>Iced Latte</td><td><span class="badge b-cold">Cold</span></td><td>29</td><td>$6.50</td><td>$188.50</td><td class="down">-1%</td></tr>
+        <tr><td>Frappuccino Blend</td><td><span class="badge b-cold">Cold</span></td><td>18</td><td>$7.50</td><td>$135.00</td><td class="up">+4%</td></tr>
+        <tr><td>Spring Blossom Latte</td><td><span class="badge b-seasonal">Seasonal</span></td><td>22</td><td>$7.25</td><td>$159.50</td><td class="up">+31%</td></tr>
+        <tr><td>Butter Croissant</td><td><span class="badge b-food">Food</span></td><td>63</td><td>$3.75</td><td>$236.25</td><td class="up">+7%</td></tr>
+        <tr><td>Blueberry Muffin</td><td><span class="badge b-food">Food</span></td><td>44</td><td>$3.50</td><td>$154.00</td><td class="down">-6%</td></tr>
+        <tr><td>Avocado Toast</td><td><span class="badge b-food">Food</span></td><td>21</td><td>$9.50</td><td>$199.50</td><td class="up">+14%</td></tr>
+        <tr><td>Banana Bread Slice</td><td><span class="badge b-food">Food</span></td><td>17</td><td>$2.50</td><td>$42.50</td><td class="down">-2%</td></tr>
+        <tr class="total-row"><td>TOTAL</td><td>—</td><td>569</td><td>—</td><td>$3,188.25</td><td class="up">+8.4%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PAYMENTS -->
+  <div class="sec-title" id="payments">Payment Methods</div>
+  <div class="grid-2">
+    <div class="card" style="padding:0; overflow:hidden;">
+      <table>
+        <thead>
+          <tr><th>Method</th><th>Transactions</th><th>Revenue</th><th>Share</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="badge b-card">Card / Contactless</span></td><td>198</td><td>$1,743.00</td><td>51.1%</td></tr>
+          <tr><td><span class="badge b-mobile">Mobile Pay</span></td><td>112</td><td>$986.00</td><td>28.9%</td></tr>
+          <tr><td><span class="badge b-cash">Cash</span></td><td>57</td><td>$502.00</td><td>14.7%</td></tr>
+          <tr><td><span class="badge b-loyalty">Loyalty App</span></td><td>20</td><td>$181.00</td><td>5.3%</td></tr>
+          <tr class="total-row"><td>TOTAL</td><td>387</td><td>$3,412.00</td><td>100%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:16px;">Payment Share</div>
+      <div class="prog-wrap">
+        <div class="prog-header"><span class="prog-label">Card / Contactless</span><span class="prog-val">51.1%</span></div>
+        <div class="prog-track"><div class="prog-fill" style="width:51.1%; background:linear-gradient(90deg,#003a5c,var(--blue))"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-header"><span class="prog-label">Mobile Pay</span><span class="prog-val">28.9%</span></div>
+        <div class="prog-track"><div class="prog-fill" style="width:28.9%; background:linear-gradient(90deg,#1a003a,var(--purple))"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-header"><span class="prog-label">Cash</span><span class="prog-val">14.7%</span></div>
+        <div class="prog-track"><div class="prog-fill" style="width:14.7%; background:linear-gradient(90deg,#003a1a,var(--green))"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-header"><span class="prog-label">Loyalty App</span><span class="prog-val">5.3%</span></div>
+        <div class="prog-track"><div class="prog-fill" style="width:5.3%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ PROJECT NECTAR ══════════════ -->
+
+  <div class="sec-title" id="why" style="margin-top:48px;">Project Nectar — The Invisible Business Engine</div>
+
+  <!-- REALITY CHECK STATS -->
+  <div class="grid-4">
+    <div class="card-sm" style="border-color:#3a2000;">
+      <div class="card-title">Customer Preference</div>
+      <div class="card-value" style="font-size:1.6rem;">70%</div>
+      <div class="card-sub">prefer messaging over apps or calls</div>
+    </div>
+    <div class="card-sm" style="border-color:#3a0000;">
+      <div class="card-title">Small Business App Adoption</div>
+      <div class="card-value" style="font-size:1.6rem; color:var(--red);">&lt;10%</div>
+      <div class="card-sub">most custom apps get ignored</div>
+    </div>
+    <div class="card-sm" style="border-color:#3a0000;">
+      <div class="card-title">Revenue Lost to Slow Replies</div>
+      <div class="card-value" style="font-size:1.6rem; color:var(--red);">20–30%</div>
+      <div class="card-sub">of potential revenue — every day</div>
+    </div>
+    <div class="card-sm" style="border-color:#003a1a;">
+      <div class="card-title">Repeat Customer Revenue</div>
+      <div class="card-value" style="font-size:1.6rem; color:var(--green);">60–70%</div>
+      <div class="card-sub">yet most shops ignore retention</div>
+    </div>
+  </div>
+
+  <!-- CORE IDEA QUOTE -->
+  <div style="margin-top:16px;">
+    <div class="quote-block">
+      "Most small businesses don't have a tech problem. They have a <strong style="color:var(--gold)">time and attention problem</strong>. Project Nectar turns your business into a 24/7 revenue machine — inside apps your customers already use."
+      <span>— Project Nectar Core Premise</span>
+    </div>
+  </div>
+
+  <!-- 4 PILLARS -->
+  <div class="sec-title" id="pillars">The 4 Pillars</div>
+  <div class="grid-2">
+
+    <div class="pillar p-revenue">
+      <div class="pillar-num">Pillar 1 — Revenue Engine</div>
+      <h3>Get More Money In</h3>
+      <div class="pillar-item">
+        <div class="pillar-dot"></div>
+        <div><strong>Conversational Ordering</strong> via WhatsApp & Telegram — customer texts, AI takes order, confirms, handles payment, gives pickup time. No app, no line.</div>
+      </div>
+      <div class="pillar-item">
+        <div class="pillar-dot"></div>
+        <div><strong>Smart Upselling</strong> — "Add a pastry for $2?" based on behavior, not random prompts.</div>
+      </div>
+      <div class="pillar-item">
+        <div class="pillar-dot"></div>
+        <div><strong>Broadcast Sales</strong> — one click to your best customers: "Fresh batch just arrived." Instant traffic spikes on demand.</div>
+      </div>
+      <span class="impact-tag">+10–25% average order value</span>
+    </div>
+
+    <div class="pillar p-retention">
+      <div class="pillar-num">Pillar 2 — Retention Engine</div>
+      <h3>Stop Losing Customers</h3>
+      <div class="pillar-item">
+        <div class="pillar-dot"></div>
+        <div><strong>Automated Review Funnel</strong> — happy customers routed to Google/Yelp; unhappy ones trigger a private owner alert before it goes public.</div>
+      </div>
+      <div class="pillar-item">
+        <div class="pillar-dot"></div>
+        <div><strong>Loyalty Intelligence</strong> — identifies your top customers and disappearing ones. Triggers "We miss you" offers and personalized incentives automatically.</div>
+      </div>
+      <span class="impact-tag">Higher ratings + lifetime value</span>
+    </div>
+
+    <div class="pillar p-ops">
+      <div class="pillar-num">Pillar 3 — Operations Engine</div>
+      <h3>Less Chaos, Less Waste</h3>
+      <div class="pillar-item">
+        <div class="pillar-dot"></div>
+        <div><strong>Smart Waste Reduction</strong> — tracks what gets thrown away and when, then suggests discounts at the right time and inventory adjustments.</div>
+      </div>
+      <div class="pillar-item">
+        <div class="pillar-dot"></div>
+        <div><strong>Real-Time Problem Solver</strong> — "Milk delivery didn't arrive." System responds with backup vendors, inventory impact, and best next action.</div>
+      </div>
+      <div class="pillar-item">
+        <div class="pillar-dot"></div>
+        <div><strong>24/7 Customer Support</strong> — handles "Are you open?" and "Do you have Wi-Fi?" so staff focuses on real work.</div>
+      </div>
+      <span class="impact-tag">Lower waste + higher margins</span>
+    </div>
+
+    <div class="pillar p-control">
+      <div class="pillar-num">Pillar 4 — Control Engine</div>
+      <h3>You Stay In Charge</h3>
+      <div class="pillar-item">
+        <div class="pillar-dot"></div>
+        <div><strong>Digital Clone Assistant</strong> — writes emails, promotions, and internal messages in your tone. Not magic. Just speed.</div>
+      </div>
+      <div class="pillar-item">
+        <div class="pillar-dot"></div>
+        <div><strong>Compliance Monitor</strong> — tracks labor laws and health regulations. Tells you what to fix. Audit-ready, always.</div>
+      </div>
+      <div class="pillar-item">
+        <div class="pillar-dot"></div>
+        <div><strong>Growth Insights</strong> — "Cut labor 5% → afford second location in 18 months." Simple math, clear decisions.</div>
+      </div>
+      <span class="impact-tag">Zero fines + clear decisions</span>
+    </div>
+  </div>
+
+  <!-- EDGE + PRICING -->
+  <div class="sec-title" id="edge">Your Edge vs. Every Other Solution</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title" style="margin-bottom:16px;">Every Other Solution</div>
+      <div class="stat-row"><span class="stat-label">Another app</span><span style="color:var(--red);">✗ Nobody downloads it</span></div>
+      <div class="stat-row"><span class="stat-label">Another dashboard</span><span style="color:var(--red);">✗ Nobody logs in</span></div>
+      <div class="stat-row"><span class="stat-label">Another login</span><span style="color:var(--red);">✗ Zero adoption</span></div>
+      <div class="stat-row"><span class="stat-label">Requires training</span><span style="color:var(--red);">✗ Weeks of onboarding</span></div>
+      <div class="stat-row"><span class="stat-label">Behavior change</span><span style="color:var(--red);">✗ Staff pushback</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:16px;">Project Nectar</div>
+      <div class="stat-row"><span class="stat-label">WhatsApp & Telegram</span><span style="color:var(--green);">✓ Already on their phone</span></div>
+      <div class="stat-row"><span class="stat-label">No downloads</span><span style="color:var(--green);">✓ Zero friction</span></div>
+      <div class="stat-row"><span class="stat-label">No training</span><span style="color:var(--green);">✓ Works from day one</span></div>
+      <div class="stat-row"><span class="stat-label">No behavior change</span><span style="color:var(--green);">✓ Fits existing habits</span></div>
+      <div class="stat-row"><span class="stat-label">ROI guarantee</span><span style="color:var(--green);">✓ 5x or don't buy it</span></div>
+    </div>
+  </div>
+
+  <!-- PRICING QUOTE -->
+  <div style="margin-top:16px;">
+    <div class="quote-block" style="border-left-color:var(--green);">
+      "If this system doesn't generate or save you at least <strong style="color:var(--green)">5x what you pay for it</strong>, you shouldn't use it."
+      <span>— The only pricing pitch that builds credibility</span>
+    </div>
+  </div>
+
+  <!-- THE CLOSE -->
+  <div class="sec-title" id="close">The Close</div>
+  <div class="close-section">
+    <h2>You Don't Need More Staff.</h2>
+    <p>You don't need another app.<br/>You don't need another dashboard nobody logs into.</p>
+    <p>You need a system that <strong style="color:var(--gold)">captures every customer, every order, and every opportunity</strong> — automatically.</p>
+    <p>You stay the owner.<br/><strong style="color:var(--gold)">This runs the machine.</strong></p>
+    <div class="hook">
+      "How much am I losing by not having this?"<br/>
+      <span style="font-size:0.8rem; color:var(--muted); font-weight:400;">That's the question. That's when you've got them.</span>
+    </div>
+  </div>
+
+  <footer>
+    Westfield Coffee Co. &mdash; Project Nectar &mdash; Internal Use Only &mdash; April 13, 2026 &mdash; UTC
+  </footer>
+
+</div><!-- /main -->
+</body>
+</html>
